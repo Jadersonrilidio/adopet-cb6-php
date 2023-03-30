@@ -1,0 +1,31 @@
+{
+    "name": "jayrods/scuba-php",
+    "description": "\"Framework\" entre aspas para o desafio de sete dias",
+    "type": "project",
+    "authors": [
+        {
+            "name": "jay rods",
+            "email": "jadersonrilidio@gmail.com",
+            "homepage": "https://www.github.com/Jadersonrilidio"
+        }
+    ],
+    "autoload": {
+        "files": [
+            "functions/dump_and_exit.php",
+            "functions/env.php"
+        ],
+        "psr-4": {
+            "Jayrods\\ScubaPHP\\": "src/"
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^6.8",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "scripts": {
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "php -S localhost:8001 -t public/"
+        ]
+    }
+}

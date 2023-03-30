@@ -1,0 +1,29 @@
+<a href="/login">
+    <h1>Scuba<span>PHP</span></h1>
+</a>
+
+<form action="/register" method="POST">
+    <p>Cadastre Um Novo Usuário</p>
+
+    {{status}}
+
+    <input type="hidden" name="mail-validation" required value="0">
+
+    <label for="nome">Nome</label>
+    <input type="text" name="name" required value="{{name-value}}">
+    {{name-errors}}
+
+    <label for="email">E-mail</label>
+    <input type="email" name="email" required value="{{email-value}}">
+    {{email-errors}}
+
+    <label for="senha">Senha</label>
+    <input type="password" name="password" required value="{{password-value}}">
+    {{password-errors}}
+
+    <label for="repita-senha">Repita Senha</label>
+    <input type="password" name="password-confirm" required value="{{password-confirm-value}}">
+    {{password-confirm-errors}}
+
+    <input type="submit" value="Salvar">
+</form>
