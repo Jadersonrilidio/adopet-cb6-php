@@ -23,4 +23,10 @@ return array(
     'fallback' => [Jayrods\ScubaPHP\Controller\NotFoundController::class, 'index'],
 
     // API Routes
+    'GET|/api/v1/tutor' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'all', []],
+    'GET|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'find', []],
+    'POST|/api/v1/tutor' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'store', []],
+    'PUT|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
+    'PATCH|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
+    'DELETE|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'remove', []],
 );
