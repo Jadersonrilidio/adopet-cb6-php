@@ -11,22 +11,12 @@ interface TutorRepository
     /**
      * 
      */
-    public function save(Tutor $tutor): int|bool;
+    public function save(Tutor $tutor): bool;
 
     /**
      * 
      */
-    public function create(Tutor $tutor): int|bool;
-
-    /**
-     * 
-     */
-    public function update(Tutor $currentTutor): int|bool;
-
-    /**
-     * 
-     */
-    public function remove(Tutor $currentTutor): int|bool;
+    public function remove(Tutor $tutor): bool;
 
     /**
      * 
@@ -36,7 +26,7 @@ interface TutorRepository
     /**
      * 
      */
-    public function find(string $uid): Tutor|false;
+    public function find(int $id): Tutor|false;
 
     /**
      * 

@@ -1,0 +1,133 @@
+#!usr/bin/env php
+<?php
+
+$dsn = 'sqlite:' . dirname(__DIR__) . '/database/database.sqlite';
+$conn = new PDO($dsn);
+
+$selectTutors = "SELECT * FROM tutors";
+
+$stmt = $conn->query($selectTutors);
+
+$tutors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (!isset($argv[1]) or $argv[1] !== "table") {
+    print_r($tutors);
+    exit;
+}
+
+echo '#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#' . PHP_EOL;
+echo '|  Id  |       name       |       email      |  password  |     picture      |    phone    |       city       |        about       |      created_at     |      updated_at     |' . PHP_EOL;
+echo '| ---- | ---------------- | ---------------- | ---------- | ---------------- | ----------- | ---------------- | ------------------ | ------------------- | ------------------- |' . PHP_EOL;
+
+foreach ($tutors as $tutor) {
+    echo '| ' . idColumn($tutor['id']);
+    echo '| ' . nameColumn($tutor['name']);
+    echo ' | ' . emailColumn($tutor['email']);
+    echo ' | ' . passwordColumn($tutor['password']);
+    echo ' | ' . pictureColumn($tutor['picture']);
+    echo ' | ' . phoneColumn($tutor['phone']);
+    echo ' | ' . cityColumn($tutor['city']);
+    echo ' | ' . aboutColumn($tutor['about']);
+    echo ' | ' . createdAtColumn($tutor['created_at']);
+    echo ' | ' . updatedAtColumn($tutor['updated_at']);
+    echo ' | ' . PHP_EOL;
+}
+
+echo '#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#' . PHP_EOL;
+
+function idColumn($id)
+{
+    return str_pad($id, 5, " ", STR_PAD_RIGHT);
+}
+
+function nameColumn($name)
+{
+    if (strlen($name) > 15) {
+        $name = substr($name, 0, 12) . '...';
+    }
+
+    return str_pad($name, 16, " ", STR_PAD_RIGHT);
+}
+
+function emailColumn($email)
+{
+    if (strlen($email) > 15) {
+        $email = substr($email, 0, 12) . '...';
+    }
+
+    return str_pad($email, 16, " ", STR_PAD_RIGHT);
+}
+
+function passwordColumn($password)
+{
+    if (isset($password)) {
+        return '**********';
+    }
+}
+
+function pictureColumn($picture)
+{
+    if (is_null($picture)) {
+        $picture = 'NULL';
+    }
+
+    if (strlen($picture) > 15) {
+        $picture = substr($picture, 0, 12) . '...';
+    }
+
+    return str_pad($picture, 16, " ", STR_PAD_RIGHT);
+}
+
+function phoneColumn($phone)
+{
+    if (is_null($phone)) {
+        $phone = ' NULL';
+        return str_pad($phone, 11, " ", STR_PAD_RIGHT);
+    }
+
+    return $phone;
+}
+
+function cityColumn($city)
+{
+    if (is_null($city)) {
+        $city = 'NULL';
+    }
+
+    if (strlen($city) > 15) {
+        $city = substr($city, 0, 12) . '...';
+    }
+
+    return str_pad($city, 16, " ", STR_PAD_RIGHT);
+}
+
+function aboutColumn($about)
+{
+    if (is_null($about)) {
+        $about = 'NULL';
+    }
+
+    if (strlen($about) > 17) {
+        $about = substr($about, 0, 14) . '...';
+    }
+
+    return str_pad($about, 18, " ", STR_PAD_RIGHT);
+}
+
+function createdAtColumn($created_at)
+{
+    if (strlen($created_at) > 19) {
+        $created_at = substr($created_at, 0, 7);
+    }
+
+    return str_pad($created_at, 19, " ", STR_PAD_RIGHT);
+}
+
+function updatedAtColumn($updated_at)
+{
+    if (strlen($updated_at) > 19) {
+        $updated_at = substr($updated_at, 0, 7);
+    }
+
+    return str_pad($updated_at, 19, " ", STR_PAD_RIGHT);
+}

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+/**
+ * Mapping, with keys representing the route and values containing the parameters:
+ * controller class, controller method and an array of middlewares.
+ */
 return array(
     // Web Auth Routes
     'GET|/register' => [Jayrods\ScubaPHP\Controller\Auth\RegisterController::class, 'index', ['guest']],
@@ -23,10 +27,10 @@ return array(
     'fallback' => [Jayrods\ScubaPHP\Controller\NotFoundController::class, 'index'],
 
     // API Routes
-    'GET|/api/v1/tutor' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'all', []],
-    'GET|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'find', []],
-    'POST|/api/v1/tutor' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'store', []],
-    'PUT|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
-    'PATCH|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
-    'DELETE|/api/v1/tutor/{uid}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'remove', []],
+    'GET|/api/tutor' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'all', []],
+    'GET|/api/tutor/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'find', []],
+    'POST|/api/tutor' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'store', []],
+    'PUT|/api/tutor/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
+    'PATCH|/api/tutor/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
+    'DELETE|/api/tutor/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'remove', []],
 );

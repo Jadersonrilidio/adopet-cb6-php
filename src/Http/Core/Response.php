@@ -9,22 +9,22 @@ class Response
     /**
      * 
      */
-    private int $httpCode;
+    protected int $httpCode;
 
     /**
      * 
      */
-    private string $content;
+    protected string $content;
 
     /**
      * 
      */
-    private string $contentType;
+    protected string $contentType;
 
     /**
      * 
      */
-    private array $headers;
+    protected array $headers;
 
     /**
      * 
@@ -55,7 +55,7 @@ class Response
     /**
      * 
      */
-    private function addContentTypeToHeaders(): void
+    protected function addContentTypeToHeaders(): void
     {
         $this->headers['Content-Type'] = $this->contentType;
     }
@@ -63,7 +63,7 @@ class Response
     /**
      * 
      */
-    private function sendHeaders(): void
+    protected function sendHeaders(): void
     {
         foreach ($this->headers as $key => $value) {
             header("$key: $value", true);

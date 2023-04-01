@@ -26,6 +26,9 @@
         "serve": [
             "Composer\\Config::disableProcessTimeout",
             "php -S localhost:8001 -t public/"
-        ]
+        ],
+        "dbinit": "php bin/db_init",
+        "dbcreate:tutor": "php bin/db_make_tutor",
+        "dbget:tutors": "php bin/db_get_tutors"
     }
 }

@@ -1,0 +1,19 @@
+#!usr/bin/env php
+<?php
+
+$name = $argv[1];
+$email = $argv[2];
+$password = password_hash($argv[3], PASSWORD_ARGON2ID);
+
+$created_at = (new DateTimeImmutable('now'))->format('Y-m-d H:i:s');
+$updated_at = $created_at;
+
+$dsn = 'sqlite:' . dirname(__DIR__) . '/database/database.sqlite';
+
+$conn = new PDO($dsn);
+
+$insertTutor = "INSERT INTO tutors (name, email, password, created_at, updated_at) VALUES ('$name', '$email', '$password', '$created_at', '$updated_at')";
+
+$result = $conn->query($insertTutor);
+
+var_dump($result);

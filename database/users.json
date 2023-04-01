@@ -1,8 +1,0 @@
-[
-    {
-        "name": "jay",
-        "email": "jadersonrilidio@gmail.com",
-        "password": "$argon2id$v=19$m=65536,t=4,p=1$bnVRMEVzUnkxWGlDWmpKSg$Am1h0+GFtWrmKKeSPhsyjTf7H4UcckoiYoK1J2irEPA",
-        "verified": false
-    }
-]

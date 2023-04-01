@@ -35,15 +35,16 @@ class JsonTutorRepository implements TutorRepository
     private function flushTutors(array $tutors): int|bool
     {
         $tutors = json_encode($tutors);
+
         return file_put_contents(self::TUTOR_DATA_PATH, $tutors);
     }
 
     /**
      * 
      */
-    public function save(Tutor $tutor): int|bool
+    public function save(Tutor $tutor): bool
     {
-        return $this->find($tutor->uid())
+        return $this->find($tutor->id())
             ? $this->update($tutor)
             : $this->create($tutor);
     }
@@ -51,26 +52,27 @@ class JsonTutorRepository implements TutorRepository
     /**
      * 
      */
-    public function create(Tutor $tutor): int|bool
+    private function create(Tutor $tutor): bool
     {
         $tutors = $this->loadTutors();
         $tutors[] = $tutor;
 
-        return $this->flushTutors($tutors);
+        return (bool) $this->flushTutors($tutors);
     }
 
     /**
      * 
      */
-    public function update(Tutor $currentTutor): int|bool
+    private function update(Tutor $currentTutor): bool
     {
         $tutors = $this->loadTutors();
-
+        
         foreach ($tutors as $i => $tutor) {
-            if ($tutor->uid() === $currentTutor->uid()) {
+            if ($tutor->id() === $currentTutor->id()) {
+                $currentTutor->updateDate();
                 $tutors[$i] = $currentTutor;
 
-                return $this->flushTutors($tutors);
+                return (bool) $this->flushTutors($tutors);
             }
         }
 
@@ -80,15 +82,15 @@ class JsonTutorRepository implements TutorRepository
     /**
      * 
      */
-    public function remove(Tutor $currentTutor): int|bool
+    public function remove(Tutor $currentTutor): bool
     {
         $tutors = $this->loadTutors();
 
         foreach ($tutors as $i => $tutor) {
-            if ($tutor->uid() === $currentTutor->uid()) {
+            if ($tutor->id() === $currentTutor->id()) {
                 unset($tutors[$i]);
 
-                return $this->flushTutors([...$tutors]);
+                return (bool) $this->flushTutors([...$tutors]);
             }
         }
 
@@ -106,12 +108,12 @@ class JsonTutorRepository implements TutorRepository
     /**
      * 
      */
-    public function find(string $uid): Tutor|false
+    public function find(int $id): Tutor|false
     {
         $tutors = $this->loadTutors();
 
         foreach ($tutors as $tutor) {
-            if ($tutor->uid() === $uid) {
+            if ($tutor->id() === $id) {
                 return $tutor;
             }
         }
@@ -143,15 +145,18 @@ class JsonTutorRepository implements TutorRepository
         $tutors = [];
 
         foreach ($dataset as $tutorData) {
-            $tutor = new Tutor(
+            $tutors[] = new Tutor(
                 name: $tutorData->name,
                 email: $tutorData->email,
-                password: $tutorData->password
+                password: $tutorData->password,
+                id: $tutorData->id,
+                picture: $tutorData->picture,
+                phone: $tutorData->phone,
+                city: $tutorData->city,
+                about: $tutorData->about,
+                created_at: $tutorData->created_at,
+                updated_at: $tutorData->updated_at,
             );
-
-            $tutor->createIdentity($tutorData->password);
-
-            $tutors[] = $tutor;
         }
 
         return $tutors;

@@ -30,6 +30,10 @@ class MiddlewareQueue
     public function __construct(array $middlewares = [])
     {
         $this->middlewares = array_merge(self::$default, $middlewares);
+
+        if (empty(self::$map)) {
+            self::$map = (include ROOT_DIR . SLASH . 'config' . SLASH . 'middlewares.php') ?? [];
+        }
     }
 
     /**
