@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Http\Core;
 
+use Jayrods\ScubaPHP\Http\Core\Helper\HttpMultipartParser;
+
 class Request
 {
     /**
@@ -15,6 +17,12 @@ class Request
      * 
      */
     private string $uri;
+
+
+    /**
+     * 
+     */
+    private string $contentType;
 
     /**
      * 
@@ -44,6 +52,11 @@ class Request
     /**
      * 
      */
+    private array $inputs = [];
+
+    /**
+     * 
+     */
     private array $files = [];
 
     /**
@@ -53,20 +66,19 @@ class Request
     {
         $this->httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $this->uri = $_SERVER['PATH_INFO'] ?? '/';
+        $this->contentType = $_SERVER['CONTENT_TYPE'] ?? 'text/html';
         $this->headers = getallheaders();
         $this->sanitizeQueryParams();
         $this->sanitizePostVars();
-
-        if ($this->httpMethod === 'PUT' or $this->httpMethod === 'PATCH') {
-            $this->extractPutVars();
-            $this->sanitizePutVars();
-        }
+        $this->handlePutVars();
+        $this->sanitizePutVars();
+        $this->mergeInputVars();
     }
 
     /**
      * 
      */
-    public function addUriParams(array $keys, array $values)
+    public function addUriParams(array $keys, array $values): void
     {
         $this->sanitizeUriParams(array_combine($keys, $values));
     }
@@ -74,20 +86,32 @@ class Request
     /**
      * 
      */
-    private function extractPutVars(): void
+    private function handlePutVars(): void
     {
-        $putData = fopen("php://input", 'r');
-        $content = stream_get_contents($putData);
-        fclose($putData);
+        if ($this->httpMethod === 'PUT' or $this->httpMethod === 'PATCH') {
+            $multipartParser = new HttpMultipartParser();
 
-        $content = str_replace('%20', ' ', $content);
-        $content = str_replace('%40', '@', $content);
-        $content = explode("&", $content);
+            $multipartParser->setContentType($this->contentType);
 
-        foreach ($content as $line) {
-            $keyValue = explode("=", $line);
-            $this->putVars[$keyValue[0]] = $keyValue[1];
+            $stream = fopen("php://input", 'r');
+
+            $multipartParser->parse($stream);
+
+            fclose($stream);
+
+            $data = $multipartParser->get();
+
+            $this->putVars = $data['variables'];
+            $this->files = $data['files'];
         }
+    }
+
+    /**
+     * 
+     */
+    private function mergeInputVars(): void
+    {
+        $this->inputs = array_merge($this->postVars, $this->putVars);
     }
 
     /**
@@ -157,6 +181,14 @@ class Request
     /**
      * 
      */
+    public function contentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * 
+     */
     public function headers(string $header = 'all'): array
     {
         return $header === 'all' ? $this->headers : $this->headers[$header];
@@ -193,40 +225,26 @@ class Request
     /**
      * 
      */
-    public function postVars(string $param = null): mixed
+    public function inputs(string $param = null): mixed
     {
-        $postVar = $this->postVars;
+        $input = $this->inputs;
 
         if (!is_null($param)) {
-            $postVar = isset($this->postVars[$param]) ? $this->postVars[$param] : null;
+            $input = isset($this->inputs[$param]) ? $this->inputs[$param] : null;
         }
 
-        return $postVar;
+        return $input;
     }
 
     /**
-     * 
-     */
-    public function putVars(string $param = null): mixed
-    {
-        $putVar = $this->putVars;
-
-        if (!is_null($param)) {
-            $putVar = isset($this->putVars[$param]) ? $this->putVars[$param] : null;
-        }
-
-        return $putVar;
-    }
-
-    /**
-     * //todo
+     * //todo create a File object DTO to store data
      */
     public function files(string $param = null): mixed
     {
         $file = $this->files;
 
         if (!is_null($param)) {
-            $file = isset($this->files[$param]) ? $this->files[$param] : null;
+            $file = isset($file[$param]) ? $file[$param] : null;
         }
 
         return $file;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\API;
 
 use Jayrods\ScubaPHP\Controller\Controller;
+use Jayrods\ScubaPHP\Controller\Traits\FileStorageHandler;
 use Jayrods\ScubaPHP\Controller\Traits\PasswordHandler;
 use Jayrods\ScubaPHP\Controller\Validation\TutorValidator;
 use Jayrods\ScubaPHP\Entity\Tutor;
@@ -18,7 +19,8 @@ use Jayrods\ScubaPHP\Repository\TutorRepository;
 
 class TutorController extends Controller
 {
-    use PasswordHandler;
+    use FileStorageHandler,
+        PasswordHandler;
 
     /**
      * 
@@ -61,13 +63,13 @@ class TutorController extends Controller
         }
 
         $tutor = new Tutor(
-            name: $this->request->postVars('name'),
-            email: $this->request->postVars('email'),
-            password: $this->passwordHash($this->request->postVars('password'))
+            name: $this->request->inputs('name'),
+            email: $this->request->inputs('email'),
+            password: $this->passwordHash($this->request->inputs('password'))
         );
 
         if (!$this->tutorRepository->save($tutor)) {
-            return new JsonResponse(['error' => 'Not possible to create tutor.'], 404);
+            return new JsonResponse(['error' => 'Not possible to create tutor.'], 400);
         }
 
         return new JsonResponse($tutor, 201);
@@ -95,7 +97,7 @@ class TutorController extends Controller
         if (!$this->tutorValidator->validate($this->request)) {
             return new JsonResponse(['errors' => ErrorMessage::errorMessages()], 400);
         }
-        
+
         $tutor = $this->tutorRepository->find((int) $this->request->uriParams('id'));
 
         if (!$tutor instanceof Tutor) {
@@ -103,23 +105,27 @@ class TutorController extends Controller
         }
 
         $newTutor = new Tutor(
-            name: $this->request->putVars('name') ?? $tutor->name(),
-            email: $this->request->putVars('email') ?? $tutor->email(),
+            name: $this->request->inputs('name') ?? $tutor->name(),
+            email: $this->request->inputs('email') ?? $tutor->email(),
             password: $tutor->password(),
             id: $tutor->id(),
-            picture: $this->request->putVars('picture') ?? $tutor->picture(),
-            phone: $this->request->putVars('phone') ?? $tutor->phone(),
-            city: $this->request->putVars('city') ?? $tutor->city(),
-            about: $this->request->putVars('about') ?? $tutor->about(),
+            picture: $this->request->files('picture')['name'] ?? $tutor->picture(),
+            phone: $this->request->inputs('phone') ?? $tutor->phone(),
+            city: $this->request->inputs('city') ?? $tutor->city(),
+            about: $this->request->inputs('about') ?? $tutor->about(),
             created_at: $tutor->createdAt(),
             updated_at: $tutor->updatedAt()
         );
 
         if (!$this->tutorRepository->save($newTutor)) {
-            return new JsonResponse(['error' => 'Error on update tutor.'], 404);
+            return new JsonResponse(['error' => 'Error on update tutor.'], 400);
         }
 
-        return new JsonResponse($newTutor, 201);
+        if ($this->request->files('picture') !== null and !$this->storeFile($this->request->files('picture'))) {
+            return new JsonResponse(['error' => 'Error on storing files.'], 400);
+        }
+
+        return new JsonResponse($newTutor, 200);
     }
 
     /**

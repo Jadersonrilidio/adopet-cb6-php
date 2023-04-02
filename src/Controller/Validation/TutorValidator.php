@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Validation;
 
 use Jayrods\ScubaPHP\Controller\Validation\Validator;
+use Jayrods\ScubaPHP\Entity\Tutor;
 use Jayrods\ScubaPHP\Infrastructure\ErrorMessage;
 use Jayrods\ScubaPHP\Http\Core\Request;
 use Jayrods\ScubaPHP\Repository\SQLiteTutorRepository;
@@ -12,6 +13,16 @@ use Jayrods\ScubaPHP\Repository\TutorRepository;
 
 class TutorValidator implements Validator
 {
+    /**
+     * 
+     */
+    private array $allowedFileFormats = array(
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/svg',
+    );
+
     /**
      * 
      */
@@ -30,41 +41,40 @@ class TutorValidator implements Validator
      */
     public function validate(Request $request): bool
     {
-        $inputs = array_merge($request->postVars(), $request->putVars());
+        $inputs = $request->inputs();
         $files = $request->files();
 
         $validation = [];
 
-        $validation['name'] = isset($inputs['name'])
-            ? $this->validateName(name: $inputs['name'])
+        $validation['name'] = $request->inputs('name')
+            ? $this->validateName(name: $request->inputs('name'))
             : true;
 
-        $validation['email'] = isset($inputs['email'])
-            ? $this->validateEmail(email: $inputs['email'], httpMethod: $request->httpMethod())
+        $validation['email'] = $request->inputs('email')
+            ? $this->validateEmail(email: $request->inputs('email'), httpMethod: $request->httpMethod(), request: $request)
             : true;
 
-        $validation['password'] = isset($inputs['password'], $inputs['password-confirm'])
-            ? $this->validatePassword(password: $inputs['password'])
+        $validation['password'] = ($request->inputs('password') and $request->inputs('password-confirm'))
+            ? $this->validatePassword(password: $request->inputs('password'))
             : true;
 
-        $validation['passwordsMatch'] = isset($inputs['password'], $inputs['password-confirm'])
-            ? $this->passwordsMatch(password: $inputs['password'], passwordConfirm: $inputs['password-confirm']) : true;
+        $validation['passwordsMatch'] = ($request->inputs('password') and $request->inputs('password-confirm'))
+            ? $this->passwordsMatch(password: $request->inputs('password'), passwordConfirm: $request->inputs('password-confirm')) : true;
 
-        // todo. validate files parameters, size, etc...
-        $validation['picture'] = isset($files['picture'])
-            ? $this->validatePicture(picture: $files['picture'])
+        $validation['picture'] = $request->files('picture')
+            ? $this->validatePicture(picture: $request->files('picture'))
             : true;
 
-        $validation['phone'] = isset($inputs['phone'])
-            ? $this->validatePhone(phone: $inputs['phone'])
+        $validation['phone'] = $request->inputs('phone')
+            ? $this->validatePhone(phone: $request->inputs('phone'))
             : true;
 
-        $validation['city'] = isset($inputs['city'])
-            ? $this->validateCity(city: $inputs['city'])
+        $validation['city'] = $request->inputs('city')
+            ? $this->validateCity(city: $request->inputs('city'))
             : true;
 
-        $validation['about'] = isset($inputs['about'])
-            ? $this->validateAbout(about: $inputs['about'])
+        $validation['about'] = $request->inputs('about')
+            ? $this->validateAbout(about: $request->inputs('about'))
             : true;
 
         return $this->check($validation);
@@ -102,14 +112,21 @@ class TutorValidator implements Validator
     /**
      * 
      */
-    private function validateEmail(string $email, string $httpMethod): bool
+    private function validateEmail(string $email, string $httpMethod, Request $request): bool
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             ErrorMessage::add('email', 'Invalid email input.');
             return false;
         }
 
-        if ($httpMethod === 'POST' and $this->userRepository->findByEmail($email)) {
+        $tutor = $this->userRepository->findByEmail($email);
+
+        if ($httpMethod === 'POST' and $tutor instanceof Tutor) {
+            ErrorMessage::add('email', 'Email already in use.');
+            return false;
+        }
+
+        if ($httpMethod !== 'POST' and $tutor instanceof Tutor and $tutor->id() != $request->uriParams('id')) {
             ErrorMessage::add('email', 'Email already in use.');
             return false;
         }
@@ -162,19 +179,34 @@ class TutorValidator implements Validator
     /**
      * 
      */
-    private function validatePicture(string $picture): bool
+    private function validatePicture(array $picture): bool
     {
-        //todo
-        // uploaded formats jpeg, jpg, png only
-        // max size = 5MB
+        if (array_search($picture['type'], $this->allowedFileFormats) === false) {
+            ErrorMessage::add('picture', 'Picture must be on formats ' . $this->allowedFormatsToString() . ' only.');
+            return false;
+        }
 
-        // max-lenght 256 characters
-        if (strlen($picture) > 256) {
-            ErrorMessage::add('picture', 'Picture should have less than 128 characters.');
+        if ($picture['error'] != 0) {
+            ErrorMessage::add('picture', 'Something went wrong on upload.');
+            return false;
+        }
+
+        if ($picture['size'] > 10240000) {
+            ErrorMessage::add('picture', 'Picture should have less than 10MB size.');
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * 
+     */
+    private function allowedFormatsToString(): string
+    {
+        $allowedFormatsString = implode(', ', $this->allowedFileFormats);
+
+        return str_replace('image/', '', $allowedFormatsString);
     }
 
     /**

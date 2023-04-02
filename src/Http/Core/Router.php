@@ -16,21 +16,6 @@ class Router
     /**
      * 
      */
-    private const REGEX_ROUTE_PARAM = '/\{([^\/]+?)\}/';
-
-    /**
-     * 
-     */
-    private const REGEX_URI_PARAM = '/\{.+?\}/';
-
-    /**
-     * 
-     */
-    private const REGEX_URI_PARAM_REPLACEMENT = '([^/]+?)';
-
-    /**
-     * 
-     */
     private Request $request;
 
     /**
@@ -86,11 +71,11 @@ class Router
 
         $routeRegexArray = $this->getJsonCache('routeRegexArray') ?? $this->createRouteRegexArray($httpMethod);
 
-        $requestRoute = "$httpMethod|$uri";
+        $requestedRoute = "$httpMethod|$uri";
 
         foreach ($routeRegexArray as $route => $regex) {
-            if (preg_match($regex, $requestRoute, $uriParamValues)) {
-                if (preg_match_all(self::REGEX_ROUTE_PARAM, $route, $uriParamKeys)) {
+            if (preg_match($regex, $requestedRoute, $uriParamValues)) {
+                if (preg_match_all('/\{([^\/]+?)\}/', $route, $uriParamKeys)) {
                     unset($uriParamValues[0]);
                     $this->request->addUriParams($uriParamKeys[1], $uriParamValues);
                 }
@@ -107,11 +92,11 @@ class Router
      */
     private function createRouteRegexArray(): array
     {
-        // Mount base regex array structure
+        // Mount route-regex array structure
         $regexArray = array_combine(array_keys($this->routes), array_keys($this->routes));
 
         // Replace URI params by regex group
-        $regexArray = preg_replace(self::REGEX_URI_PARAM, self::REGEX_URI_PARAM_REPLACEMENT, $regexArray);
+        $regexArray = preg_replace('/\{.+?\}/', '([^/]+?)', $regexArray);
 
         // Format regex expression slashes
         $regexArray = str_replace('/', '\/', $regexArray);

@@ -9,7 +9,8 @@ use Jayrods\ScubaPHP\Http\Middleware\MiddlewareQueue;
 define('ROOT_DIR', dirname(__DIR__));
 define('SLASH', DIRECTORY_SEPARATOR);
 
-define('VIEW_PATH', ROOT_DIR . SLASH . 'resources' . SLASH . 'view' . SLASH);
+define('RESOURCES_PATH', ROOT_DIR . SLASH . 'resources' . SLASH);
+define('VIEW_PATH', RESOURCES_PATH . 'view' . SLASH);
 define('COMPONENT_PATH', VIEW_PATH . 'components' . SLASH);
 define('LAYOUT_PATH', VIEW_PATH . 'layout' . SLASH);
 define('DATABASE_PATH', ROOT_DIR . SLASH . 'database' . SLASH);

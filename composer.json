@@ -12,7 +12,8 @@
     "autoload": {
         "files": [
             "functions/dump_and_exit.php",
-            "functions/env.php"
+            "functions/env.php",
+            "functions/print_and_exit.php"
         ],
         "psr-4": {
             "Jayrods\\ScubaPHP\\": "src/"
