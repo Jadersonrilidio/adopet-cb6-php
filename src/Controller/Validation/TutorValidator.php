@@ -190,12 +190,12 @@ class TutorValidator implements Validator
             return false;
         }
 
-        if (array_search($realFileType, $this->allowedFileFormats) === false) {
-            ErrorMessage::add('picture', 'Picture must be on formats ' . $this->allowedFormatsToString() . ' only.');
+        if (in_array($realFileType, $this->allowedFileFormats) === false) {
+            ErrorMessage::add('picture', 'Picture must be on formats ' . $this->allowedFileFormatsToString() . ' only.');
             return false;
         }
 
-        if ($realFileSize > 10240000) {
+        if ($realFileSize >= ((int) ini_get("upload_max_filesize")) * 1024 * 1024) {
             ErrorMessage::add('picture', 'Picture should have less than 10MB size.');
             return false;
         }
@@ -206,7 +206,7 @@ class TutorValidator implements Validator
     /**
      * 
      */
-    private function allowedFormatsToString(): string
+    private function allowedFileFormatsToString(): string
     {
         $allowedFormatsString = implode(', ', $this->allowedFileFormats);
 

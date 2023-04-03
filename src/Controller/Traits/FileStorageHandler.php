@@ -7,13 +7,27 @@ trait FileStorageHandler
     /**
      * 
      */
-    public function storeFile(array $fileData): int|bool
+    public function storeFile(array $fileData): bool
     {
         $from = $fileData['tmp_name'];
         $to = RESOURCES_PATH . 'img' . SLASH . $fileData['hashname'];
 
-        $content = file_get_contents($from);
+        $result = copy($from, $to);
 
-        return file_put_contents($to, $content);
+        unlink($from);
+
+        return $result;
+    }
+
+    /**
+     * 
+     */
+    public function deleteFile(?string $file = null): bool
+    {
+        if (!is_null($file)) {
+            return unlink(RESOURCES_PATH . 'img' . SLASH . $file);
+        }
+
+        return false;
     }
 }

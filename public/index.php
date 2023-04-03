@@ -12,6 +12,7 @@ $request = new Request();
 $middlewareQueue = new MiddlewareQueue();
 $routes = include ROOT_DIR . SLASH . 'config' . SLASH . 'routes.php';
 
+
 $router = new Router($request, $middlewareQueue, $routes);
 
 $router->handleRequest()->sendResponse();

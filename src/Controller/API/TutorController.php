@@ -125,6 +125,8 @@ class TutorController extends Controller
             return new JsonResponse(['error' => 'Error on storing files.'], 400);
         }
 
+        $this->deleteFile($tutor->picture());
+
         return new JsonResponse($newTutor, 200);
     }
 
@@ -140,6 +142,8 @@ class TutorController extends Controller
         }
 
         $this->tutorRepository->remove($tutor);
+
+        $this->deleteFile($tutor->picture());
 
         return new JsonResponse($tutor, 200);
     }
