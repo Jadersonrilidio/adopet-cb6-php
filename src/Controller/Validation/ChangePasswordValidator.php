@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Controller\Validation;
 
-use Jayrods\ScubaPHP\Controller\Traits\{PasswordHandler, SSLEncryption};
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Traits\SSLEncryption;
 use Jayrods\ScubaPHP\Controller\Validation\Validator;
-use Jayrods\ScubaPHP\Http\Core\{Request, Router};
-use Jayrods\ScubaPHP\Infrastructure\{Auth, FlashMessage};
-use Jayrods\ScubaPHP\Repository\JsonUserRepository;
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Router;
+use Jayrods\ScubaPHP\Infrastructure\Auth;
+use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
 
 class ChangePasswordValidator implements Validator
 {
@@ -18,7 +22,7 @@ class ChangePasswordValidator implements Validator
     /**
      * 
      */
-    private JsonUserRepository $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
@@ -46,23 +50,23 @@ class ChangePasswordValidator implements Validator
     public function validate(Request $request): bool
     {
         $passwordHasAtLeastTenChars = $this->validatePasswordHasAtLeastTenChars(
-            password: $request->postVars('password')
+            password: $request->inputs('password')
         );
 
         $passwordsMatch = $this->validatePasswordsMatch(
-            password: $request->postVars('password'),
-            passwordConfirm: $request->postVars('password-confirm')
+            password: $request->inputs('password'),
+            passwordConfirm: $request->inputs('password-confirm')
         );
 
         if (!$passwordHasAtLeastTenChars or !$passwordsMatch) {
             $this->flashMsg->set([
                 'status-class' => 'mensagem-erro',
                 'status-message' => 'Error: Invalid inputs.',
-                'password-value' => $request->postVars('password'),
-                'password-confirm-value' => $request->postVars('password-confirm'),
+                'password-value' => $request->inputs('password'),
+                'password-confirm-value' => $request->inputs('password-confirm'),
             ]);
 
-            Router::redirect('change-password?token=' . $request->postVars('token'));
+            Router::redirect('change-password?token=' . $request->inputs('token'));
         }
 
         return true;

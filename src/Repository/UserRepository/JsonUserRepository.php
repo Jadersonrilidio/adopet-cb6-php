@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Jayrods\ScubaPHP\Repository;
+namespace Jayrods\ScubaPHP\Repository\UserRepository;
 
-use Jayrods\ScubaPHP\Controller\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
 use Jayrods\ScubaPHP\Entity\User;
-use Jayrods\ScubaPHP\Repository\UserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
 class JsonUserRepository implements UserRepository
 {

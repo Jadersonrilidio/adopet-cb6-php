@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Http\Core;
 
-use Jayrods\ScubaPHP\Http\Core\Helper\HttpMultipartParser;
+use Jayrods\ScubaPHP\Infrastructure\Helper\HttpParser;
 
 class Request
 {
@@ -42,16 +42,6 @@ class Request
     /**
      * 
      */
-    private array $postVars = [];
-
-    /**
-     * 
-     */
-    private array $putVars = [];
-
-    /**
-     * 
-     */
     private array $inputs = [];
 
     /**
@@ -64,15 +54,22 @@ class Request
      */
     public function __construct()
     {
+        $this->run();
+    }
+
+    /**
+     * 
+     */
+    public function run(): void
+    {
         $this->httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $this->uri = $_SERVER['PATH_INFO'] ?? '/';
+        $this->uri = $this->sanitizedUri();
         $this->contentType = $_SERVER['CONTENT_TYPE'] ?? 'text/html';
         $this->headers = getallheaders();
-        $this->sanitizeQueryParams();
-        $this->sanitizePostVars();
+        $this->files = $this->handleFiles($_FILES);
+        $this->handleQueryParams();
+        $this->handlePostVars();
         $this->handlePutVars();
-        $this->sanitizePutVars();
-        $this->mergeInputVars();
     }
 
     /**
@@ -80,44 +77,23 @@ class Request
      */
     public function addUriParams(array $keys, array $values): void
     {
-        $this->sanitizeUriParams(array_combine($keys, $values));
+        $this->handleUriParams(array_combine($keys, $values));
     }
 
     /**
      * 
      */
-    private function handlePutVars(): void
+    private function sanitizedUri(): string
     {
-        if ($this->httpMethod === 'PUT' or $this->httpMethod === 'PATCH') {
-            $multipartParser = new HttpMultipartParser();
-
-            $multipartParser->setContentType($this->contentType);
-
-            $stream = fopen("php://input", 'r');
-
-            $multipartParser->parse($stream);
-
-            fclose($stream);
-
-            $data = $multipartParser->get();
-
-            $this->putVars = $data['variables'];
-            $this->files = $data['files'];
-        }
+        return isset($_SERVER['PATH_INFO'])
+            ? filter_input(INPUT_SERVER, 'PATH_INFO', FILTER_SANITIZE_FULL_SPECIAL_CHARS)
+            : '/';
     }
 
     /**
      * 
      */
-    private function mergeInputVars(): void
-    {
-        $this->inputs = array_merge($this->postVars, $this->putVars);
-    }
-
-    /**
-     * 
-     */
-    private function sanitizeUriParams(array $params): void
+    private function handleUriParams(array $params): void
     {
         foreach ($params as $key => $value) {
             $var = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
@@ -128,7 +104,7 @@ class Request
     /**
      * 
      */
-    private function sanitizeQueryParams(): void
+    private function handleQueryParams(): void
     {
         $paramKeys = array_keys($_GET);
 
@@ -141,24 +117,68 @@ class Request
     /**
      * 
      */
-    private function sanitizePostVars(): void
+    private function handlePostVars(): void
     {
         $paramKeys = array_keys($_POST);
 
         foreach ($paramKeys as $param) {
             $postVar = filter_input(INPUT_POST, $param, FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
-            $this->postVars[$param] = !ctype_space($postVar) ? $postVar : '';
+            $this->inputs[$param] = !ctype_space($postVar) ? $postVar : '';
         }
     }
 
     /**
      * 
      */
-    private function sanitizePutVars(): void
+    private function handleFiles(?array $files = null): array
     {
-        foreach ($this->putVars as $key => $value) {
+        if (empty($files) or is_null($files)) {
+            return [];
+        }
+
+        $files = array_map(function ($file) {
+            $extension = explode('.', $file['name'])[1];
+            $hashedName = 'upload_' . hash('md5', uniqid() . time());
+
+            $file['hashname'] = $hashedName . '.' . $extension;
+
+            return $file;
+        }, $files);
+
+        return $files ?? [];
+    }
+
+    /**
+     * 
+     */
+    private function handlePutVars(): void
+    {
+        if ($this->httpMethod === 'PUT' or $this->httpMethod === 'PATCH') {
+            $multipartParser = new HttpParser();
+
+            $multipartParser->setContentType($this->contentType);
+
+            $stream = fopen("php://input", 'r');
+
+            $multipartParser->parse($stream);
+
+            fclose($stream);
+
+            $data = $multipartParser->get();
+
+            $this->handleInputs($data['variables']);
+            $this->files = $this->handleFiles($data['files']);
+        }
+    }
+
+    /**
+     * 
+     */
+    private function handleInputs(array $variables): void
+    {
+        foreach ($variables as $key => $value) {
             $value = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
-            $this->putVars[$key] = !ctype_space($value) ? $value : '';
+            $this->inputs[$key] = !ctype_space($value) ? $value : '';
         }
     }
 
@@ -189,9 +209,15 @@ class Request
     /**
      * 
      */
-    public function headers(string $header = 'all'): array
+    public function headers(string $param = 'all'): array|string|null
     {
-        return $header === 'all' ? $this->headers : $this->headers[$header];
+        $header = $this->headers;
+
+        if (!is_null($param)) {
+            $header = isset($this->headers[$param]) ? $this->headers[$param] : null;
+        }
+
+        return $header;
     }
 
     /**
@@ -237,7 +263,7 @@ class Request
     }
 
     /**
-     * //todo create a File object DTO to store data
+     * //todo create a File object DTO to store data?
      */
     public function files(string $param = null): mixed
     {

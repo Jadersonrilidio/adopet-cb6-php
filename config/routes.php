@@ -26,10 +26,10 @@ return array(
     'fallback' => [Jayrods\ScubaPHP\Controller\NotFoundController::class, 'index'],
 
     // API Routes
-    'GET|/api/tutors' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'all', []],
-    'GET|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'find', []],
-    'POST|/api/tutors' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'store', []],
-    'PUT|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
-    'PATCH|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update', []],
-    'DELETE|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'remove', []],
+    'GET|/api/tutors' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'all'],
+    'GET|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'find'],
+    'POST|/api/tutors' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'store'],
+    'PUT|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update'],
+    'PATCH|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update'],
+    'DELETE|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'remove'],
 );

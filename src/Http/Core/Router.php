@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Http\Core;
 
-use Jayrods\ScubaPHP\Controller\Traits\JsonCache;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, View};
-use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Http\Middleware\MiddlewareQueue;
+use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
+use Jayrods\ScubaPHP\Traits\JsonCache;
 
 class Router
 {
@@ -21,22 +23,22 @@ class Router
     /**
      * 
      */
+    private MiddlewareQueue $middlewareQueue;
+
+    /**
+     * 
+     */
     private array $routes;
 
     /**
      * 
      */
-    private MiddlewareQueue $queue;
-
-    /**
-     * 
-     */
-    public function __construct(Request $request, array $routes)
+    public function __construct(Request $request, MiddlewareQueue $middlewareQueue, array $routes)
     {
         $this->request = $request;
-        $this->routes = $routes;
+        $this->middlewareQueue = $middlewareQueue;
 
-        $this->queue = new MiddlewareQueue();
+        $this->routes = $routes;
     }
 
     /**
@@ -77,6 +79,7 @@ class Router
             if (preg_match($regex, $requestedRoute, $uriParamValues)) {
                 if (preg_match_all('/\{([^\/]+?)\}/', $route, $uriParamKeys)) {
                     unset($uriParamValues[0]);
+
                     $this->request->addUriParams($uriParamKeys[1], $uriParamValues);
                 }
 
@@ -119,9 +122,9 @@ class Router
      */
     private function executeMiddlewaresQueue(array $middlewares): bool
     {
-        $this->queue->addMiddlewares($middlewares);
+        $this->middlewareQueue->addMiddlewares($middlewares);
 
-        return $this->queue->next($this->request);
+        return $this->middlewareQueue->next($this->request);
     }
 
     /**

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Jayrods\ScubaPHP\Repository;
+namespace Jayrods\ScubaPHP\Repository\TutorRepository;
 
-use Jayrods\ScubaPHP\Controller\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
 use Jayrods\ScubaPHP\Entity\Tutor;
-use Jayrods\ScubaPHP\Repository\TutorRepository;
+use Jayrods\ScubaPHP\Repository\TutorRepository\TutorRepository;
 
 class JsonTutorRepository implements TutorRepository
 {

@@ -10,7 +10,7 @@ trait FileStorageHandler
     public function storeFile(array $fileData): int|bool
     {
         $from = $fileData['tmp_name'];
-        $to = RESOURCES_PATH . 'img' . SLASH . $fileData['name'];
+        $to = RESOURCES_PATH . 'img' . SLASH . $fileData['hashname'];
 
         $content = file_get_contents($from);
 

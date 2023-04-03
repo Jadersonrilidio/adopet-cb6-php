@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Http\Middleware;
 
 use Closure;
-use Jayrods\ScubaPHP\Http\Core\{Request, Router};
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Router;
 use Jayrods\ScubaPHP\Infrastructure\Auth;
 use Jayrods\ScubaPHP\Http\Middleware\Middleware;
 

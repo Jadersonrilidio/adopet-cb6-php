@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Validation;
 
 use Jayrods\ScubaPHP\Controller\Validation\Validator;
-use Jayrods\ScubaPHP\Http\Core\{Request, Router};
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Router;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\{JsonUserRepository, UserRepository};
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
 class RegisterValidator implements Validator
 {
@@ -36,30 +38,30 @@ class RegisterValidator implements Validator
     public function validate(Request $request): bool
     {
         $nameDontContainInvalidCharacters = $this->validateNameDoesNotContainInvalidCharacters(
-            name: $request->postVars('name')
+            name: $request->inputs('name')
         );
 
         $emailIsNotRegistered = $this->validateEmailIsNotRegistered(
-            email: $request->postVars('email')
+            email: $request->inputs('email')
         );
 
         $passwordHasAtLeastTenChars = $this->validatePasswordHasAtLeastTenChars(
-            password: $request->postVars('password')
+            password: $request->inputs('password')
         );
 
         $passwordsMatch = $this->validatePasswordsMatch(
-            password: $request->postVars('password'),
-            passwordConfirm: $request->postVars('password-confirm')
+            password: $request->inputs('password'),
+            passwordConfirm: $request->inputs('password-confirm')
         );
 
         if (!$nameDontContainInvalidCharacters or !$emailIsNotRegistered or !$passwordHasAtLeastTenChars or !$passwordsMatch) {
             $this->flashMsg->set([
                 'status-class' => 'mensagem-erro',
                 'status-message' => 'Error: Not possible to register.',
-                'name-value' => $request->postVars('name'),
-                'email-value' => $request->postVars('email'),
-                'password-value' => $request->postVars('password'),
-                'password-confirm-value' => $request->postVars('password-confirm'),
+                'name-value' => $request->inputs('name'),
+                'email-value' => $request->inputs('email'),
+                'password-value' => $request->inputs('password'),
+                'password-confirm-value' => $request->inputs('password-confirm'),
             ]);
 
             Router::redirect('register');

@@ -6,7 +6,8 @@ namespace Jayrods\ScubaPHP\Http\Middleware;
 
 use Closure;
 use Jayrods\ScubaPHP\Controller\MaintenanceController;
-use Jayrods\ScubaPHP\Http\Core\{Request, View};
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Http\Middleware\Middleware;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
 

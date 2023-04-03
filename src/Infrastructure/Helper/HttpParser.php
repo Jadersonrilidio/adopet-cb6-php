@@ -1,10 +1,10 @@
 <?php
 
-namespace Jayrods\ScubaPHP\Http\Core\Helper;
+namespace Jayrods\ScubaPHP\Infrastructure\Helper;
 
 use InvalidArgumentException;
 
-class HttpMultipartParser
+class HttpParser
 {
     /**
      * 
@@ -19,7 +19,7 @@ class HttpMultipartParser
     /**
      * 
      */
-    private ?array $partInfo = null;
+    private ?array $inputInfo = null;
 
     /**
      * 
@@ -32,7 +32,7 @@ class HttpMultipartParser
     private array $files = [];
 
     /**
-     * Set and parse Request Content-Type if needed.
+     * Set and parse raw Request Content-Type.
      * 
      * @throws InvalidArgumentException
      */
@@ -106,7 +106,7 @@ class HttpMultipartParser
      */
     public function parseMultipartFormData($stream): void
     {
-        $this->resetPartInfo();
+        $this->resetInputInfo();
 
         while ($lineN = fgets($stream)) {
             $line = trim($lineN);
@@ -116,13 +116,13 @@ class HttpMultipartParser
             }
 
             if ($line === '') {
-                if (!empty($this->partInfo['Content-Disposition']['filename'])) {
-                    $this->parseFile($stream, $this->partInfo);
-                } else if (!empty($this->partInfo['Content-Disposition']['name'])) {
-                    $this->parseVariable($stream, $this->partInfo['Content-Disposition']['name']);
+                if (!empty($this->inputInfo['Content-Disposition']['filename'])) {
+                    $this->parseFile($stream, $this->inputInfo);
+                } else if (!empty($this->inputInfo['Content-Disposition']['name'])) {
+                    $this->parseVariable($stream, $this->inputInfo['Content-Disposition']['name']);
                 }
 
-                $this->resetPartInfo();
+                $this->resetInputInfo();
                 continue;
             }
 
@@ -132,7 +132,7 @@ class HttpMultipartParser
 
             // $headerVal = str_replace('Content-Disposition: form-data; ', '', $line);
 
-            $this->partInfo[$headerKey] = $this->parseHeaderValue($line, $headerKey);
+            $this->inputInfo[$headerKey] = $this->parseHeaderValue($line, $headerKey);
         }
     }
 
@@ -181,13 +181,13 @@ class HttpMultipartParser
     /**
      * 
      */
-    private function parseFile($stream, array $partInfo)
+    private function parseFile($stream, array $inputInfo)
     {
         $tempdir = sys_get_temp_dir();
 
-        $name = $partInfo['Content-Disposition']['name'];
-        $fileStruct['name'] = $partInfo['Content-Disposition']['filename'];
-        $fileStruct['type'] = $partInfo['Content-Type']['value'];
+        $name = $inputInfo['Content-Disposition']['name'];
+        $fileStruct['name'] = $inputInfo['Content-Disposition']['filename'];
+        $fileStruct['type'] = $inputInfo['Content-Type']['value'];
 
         $this->files[$name] = &$fileStruct;
 
@@ -233,8 +233,8 @@ class HttpMultipartParser
     /**
      * 
      */
-    private function resetPartInfo(): void
+    private function resetInputInfo(): void
     {
-        $this->partInfo = null;
+        $this->inputInfo = null;
     }
 }

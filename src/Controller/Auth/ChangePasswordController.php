@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Auth;
 
 use Jayrods\ScubaPHP\Controller\Controller;
-use Jayrods\ScubaPHP\Controller\Traits\{PasswordHandler, SSLEncryption};
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Traits\SSLEncryption;
 use Jayrods\ScubaPHP\Controller\Validation\ChangePasswordValidator;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, Router, View};
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\Router;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Entity\User;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
 class ChangePasswordController extends Controller
 {
@@ -25,7 +30,7 @@ class ChangePasswordController extends Controller
     /**
      * 
      */
-    private JsonUserRepository $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
@@ -85,7 +90,7 @@ class ChangePasswordController extends Controller
     {
         $this->changePasswordValidator->validate($this->request);
 
-        $token = $this->SSLDecrypt($this->request->postVars('token'));
+        $token = $this->SSLDecrypt($this->request->inputs('token'));
         $token = explode('=', $token);
 
         $email = $token[0];
@@ -109,7 +114,7 @@ class ChangePasswordController extends Controller
             name: $user->name(),
             email: $user->email(),
             verified: $user->verified(),
-            password: $this->passwordHash($this->request->postVars('password')),
+            password: $this->passwordHash($this->request->inputs('password')),
         );
 
         if (!$this->userRepository->update($updatedUser)) {

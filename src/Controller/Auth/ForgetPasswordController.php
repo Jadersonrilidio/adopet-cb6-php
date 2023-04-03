@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Auth;
 
 use Jayrods\ScubaPHP\Controller\Controller;
-use Jayrods\ScubaPHP\Controller\Traits\SSLEncryption;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, Router, View};
+use Jayrods\ScubaPHP\Traits\SSLEncryption;
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\Router;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Entity\User;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 use Jayrods\ScubaPHP\Service\MailService;
 
 class ForgetPasswordController extends Controller
@@ -19,7 +23,7 @@ class ForgetPasswordController extends Controller
     /**
      * 
      */
-    private JsonUserRepository $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
@@ -62,7 +66,7 @@ class ForgetPasswordController extends Controller
     public function sendmail(): Response
     {
         $user = $this->userRepository->findByEmail(
-            email: $this->request->postVars('email')
+            email: $this->request->inputs('email')
         );
 
         if (!$user instanceof User) {

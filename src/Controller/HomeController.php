@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller;
 
 use Jayrods\ScubaPHP\Controller\Controller;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, View};
-use Jayrods\ScubaPHP\Infrastructure\{Auth, FlashMessage};
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\View;
+use Jayrods\ScubaPHP\Infrastructure\Auth;
+use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
 
 class HomeController extends Controller
 {

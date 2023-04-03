@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Jayrods\ScubaPHP\Controller\Traits;
+namespace Jayrods\ScubaPHP\Traits;
 
 trait SSLEncryption
 {

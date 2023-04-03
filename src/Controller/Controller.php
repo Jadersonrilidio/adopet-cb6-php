@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Controller;
 
-use Jayrods\ScubaPHP\Http\Core\{Request, View};
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
 
 abstract class Controller

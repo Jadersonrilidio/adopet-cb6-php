@@ -8,8 +8,8 @@ use Jayrods\ScubaPHP\Controller\Validation\Validator;
 use Jayrods\ScubaPHP\Entity\Tutor;
 use Jayrods\ScubaPHP\Infrastructure\ErrorMessage;
 use Jayrods\ScubaPHP\Http\Core\Request;
-use Jayrods\ScubaPHP\Repository\SQLiteTutorRepository;
-use Jayrods\ScubaPHP\Repository\TutorRepository;
+use Jayrods\ScubaPHP\Repository\TutorRepository\SQLiteTutorRepository;
+use Jayrods\ScubaPHP\Repository\TutorRepository\TutorRepository;
 
 class TutorValidator implements Validator
 {
@@ -181,17 +181,21 @@ class TutorValidator implements Validator
      */
     private function validatePicture(array $picture): bool
     {
-        if (array_search($picture['type'], $this->allowedFileFormats) === false) {
-            ErrorMessage::add('picture', 'Picture must be on formats ' . $this->allowedFormatsToString() . ' only.');
-            return false;
-        }
+        $realFile = $picture['tmp_name'];
+        $realFileSize = filesize($realFile);
+        $realFileType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $realFile);
 
-        if ($picture['error'] != 0) {
+        if ($picture['error'] != UPLOAD_ERR_OK) {
             ErrorMessage::add('picture', 'Something went wrong on upload.');
             return false;
         }
 
-        if ($picture['size'] > 10240000) {
+        if (array_search($realFileType, $this->allowedFileFormats) === false) {
+            ErrorMessage::add('picture', 'Picture must be on formats ' . $this->allowedFormatsToString() . ' only.');
+            return false;
+        }
+
+        if ($realFileSize > 10240000) {
             ErrorMessage::add('picture', 'Picture should have less than 10MB size.');
             return false;
         }

@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Auth;
 
 use Jayrods\ScubaPHP\Controller\Controller;
-use Jayrods\ScubaPHP\Controller\Traits\PasswordHandler;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, Router, View};
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\Router;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Entity\User;
-use Jayrods\ScubaPHP\Infrastructure\{Auth, FlashMessage};
-use Jayrods\ScubaPHP\Repository\JsonUserRepository;
+use Jayrods\ScubaPHP\Infrastructure\Auth;
+use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
 class LoginController extends Controller
 {
@@ -18,7 +23,7 @@ class LoginController extends Controller
     /**
      * 
      */
-    private JsonUserRepository $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
@@ -76,11 +81,11 @@ class LoginController extends Controller
     public function login(): Response
     {
         $user = $this->userRepository->findByEmail(
-            email: $this->request->postVars('email')
+            email: $this->request->inputs('email')
         );
 
         $passwordCheck = $this->passwordVerify(
-            password: $this->request->postVars('password'),
+            password: $this->request->inputs('password'),
             hash: $user instanceof User ? $user->password() : ''
         );
 
@@ -99,7 +104,7 @@ class LoginController extends Controller
         if ($this->passwordNeedRehash($user->password())) {
             $this->passwordRehash(
                 user: $user,
-                password: $this->request->postVars('password')
+                password: $this->request->inputs('password')
             );
         }
 
@@ -123,8 +128,8 @@ class LoginController extends Controller
             !$this->flashMsg->set([
                 'status-class' => 'mensagem-erro',
                 'status-message' => 'Invalid email or password.',
-                'email-value' => $this->request->postVars('email'),
-                'password-value' => $this->request->postVars('password'),
+                'email-value' => $this->request->inputs('email'),
+                'password-value' => $this->request->inputs('password'),
             ]);
 
             return false;
@@ -146,8 +151,8 @@ class LoginController extends Controller
             $this->flashMsg->set([
                 'status-class' => 'mensagem-erro',
                 'status-message' => 'Email not verified.',
-                'email-value' => $this->request->postVars('email'),
-                'password-value' => $this->request->postVars('password'),
+                'email-value' => $this->request->inputs('email'),
+                'password-value' => $this->request->inputs('password'),
             ]);
 
             return false;

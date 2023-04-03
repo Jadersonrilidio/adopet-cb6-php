@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Auth;
 
 use Jayrods\ScubaPHP\Controller\Controller;
-use Jayrods\ScubaPHP\Controller\Traits\{PasswordHandler, SSLEncryption};
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Traits\SSLEncryption;
 use Jayrods\ScubaPHP\Controller\Validation\RegisterValidator;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, Router, View};
-use Jayrods\ScubaPHP\Entity\User;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\JsonUserRepository;
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\Router;
+use Jayrods\ScubaPHP\Http\Core\View;
+use Jayrods\ScubaPHP\Entity\User;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
 use Jayrods\ScubaPHP\Service\MailService;
 
 class RegisterController extends Controller
@@ -21,7 +26,7 @@ class RegisterController extends Controller
     /**
      * 
      */
-    private JsonUserRepository $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
@@ -99,9 +104,9 @@ class RegisterController extends Controller
         $this->registerValidator->validate($this->request);
 
         $user = new User(
-            name: $this->request->postVars('name'),
-            email: $this->request->postVars('email'),
-            password: $this->passwordHash($this->request->postVars('password'))
+            name: $this->request->inputs('name'),
+            email: $this->request->inputs('email'),
+            password: $this->passwordHash($this->request->inputs('password'))
         );
 
         $this->userRepository->create($user);

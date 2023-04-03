@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Jayrods\ScubaPHP\Repository;
+namespace Jayrods\ScubaPHP\Repository\TutorRepository;
 
 use Jayrods\ScubaPHP\Entity\Tutor;
 

@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Auth;
 
 use Jayrods\ScubaPHP\Controller\Controller;
-use Jayrods\ScubaPHP\Controller\Traits\SSLEncryption;
-use Jayrods\ScubaPHP\Http\Core\{Request, Response, Router, View};
+use Jayrods\ScubaPHP\Traits\SSLEncryption;
+use Jayrods\ScubaPHP\Http\Core\Request;
+use Jayrods\ScubaPHP\Http\Core\Response;
+use Jayrods\ScubaPHP\Http\Core\Router;
+use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Entity\User;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\{JsonUserRepository, UserRepository};
+use Jayrods\ScubaPHP\Repository\UserRepository\JsonUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
 class EmailVerificationController extends Controller
 {

@@ -6,7 +6,7 @@ namespace Jayrods\ScubaPHP\Controller\API;
 
 use Jayrods\ScubaPHP\Controller\Controller;
 use Jayrods\ScubaPHP\Controller\Traits\FileStorageHandler;
-use Jayrods\ScubaPHP\Controller\Traits\PasswordHandler;
+use Jayrods\ScubaPHP\Traits\PasswordHandler;
 use Jayrods\ScubaPHP\Controller\Validation\TutorValidator;
 use Jayrods\ScubaPHP\Entity\Tutor;
 use Jayrods\ScubaPHP\Http\Core\Request;
@@ -14,8 +14,8 @@ use Jayrods\ScubaPHP\Http\Core\JsonResponse;
 use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Infrastructure\ErrorMessage;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\SQLiteTutorRepository;
-use Jayrods\ScubaPHP\Repository\TutorRepository;
+use Jayrods\ScubaPHP\Repository\TutorRepository\SQLiteTutorRepository;
+use Jayrods\ScubaPHP\Repository\TutorRepository\TutorRepository;
 
 class TutorController extends Controller
 {
@@ -109,7 +109,7 @@ class TutorController extends Controller
             email: $this->request->inputs('email') ?? $tutor->email(),
             password: $tutor->password(),
             id: $tutor->id(),
-            picture: $this->request->files('picture')['name'] ?? $tutor->picture(),
+            picture: $this->request->files('picture')['hashname'] ?? $tutor->picture(),
             phone: $this->request->inputs('phone') ?? $tutor->phone(),
             city: $this->request->inputs('city') ?? $tutor->city(),
             about: $this->request->inputs('about') ?? $tutor->about(),

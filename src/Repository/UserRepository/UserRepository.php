@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Jayrods\ScubaPHP\Repository;
+namespace Jayrods\ScubaPHP\Repository\UserRepository;
 
 use Jayrods\ScubaPHP\Entity\User;
 
