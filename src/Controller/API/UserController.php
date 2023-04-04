@@ -6,31 +6,33 @@ namespace Jayrods\ScubaPHP\Controller\API;
 
 use Jayrods\ScubaPHP\Controller\Controller;
 use Jayrods\ScubaPHP\Controller\Traits\FileStorageHandler;
+use Jayrods\ScubaPHP\Controller\Traits\StandandJsonResponse;
 use Jayrods\ScubaPHP\Traits\PasswordHandler;
-use Jayrods\ScubaPHP\Controller\Validation\TutorValidator;
-use Jayrods\ScubaPHP\Entity\Tutor;
+use Jayrods\ScubaPHP\Controller\Validation\UserValidator;
+use Jayrods\ScubaPHP\Entity\User\Role;
+use Jayrods\ScubaPHP\Entity\User\User;
 use Jayrods\ScubaPHP\Http\Core\Request;
 use Jayrods\ScubaPHP\Http\Core\JsonResponse;
 use Jayrods\ScubaPHP\Http\Core\View;
-use Jayrods\ScubaPHP\Infrastructure\ErrorMessage;
 use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
-use Jayrods\ScubaPHP\Repository\TutorRepository\SQLiteTutorRepository;
-use Jayrods\ScubaPHP\Repository\TutorRepository\TutorRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\SQLiteUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
-class TutorController extends Controller
+class UserController extends Controller
 {
     use FileStorageHandler,
-        PasswordHandler;
+        PasswordHandler,
+        StandandJsonResponse;
 
     /**
      * 
      */
-    private TutorRepository $tutorRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
      */
-    private TutorValidator $tutorValidator;
+    private UserValidator $userValidator;
 
     /**
      * 
@@ -39,8 +41,8 @@ class TutorController extends Controller
     {
         parent::__construct($request, $view, $flashMsg);
 
-        $this->tutorRepository = new SQLiteTutorRepository();
-        $this->tutorValidator = new TutorValidator();
+        $this->userRepository = new SQLiteUserRepository();
+        $this->userValidator = new UserValidator();
     }
 
     /**
@@ -48,7 +50,7 @@ class TutorController extends Controller
      */
     public function all(): JsonResponse
     {
-        $content = $this->tutorRepository->all();
+        $content = $this->userRepository->all();
 
         return new JsonResponse($content, 200);
     }
@@ -58,21 +60,21 @@ class TutorController extends Controller
      */
     public function store(): JsonResponse
     {
-        if (!$this->tutorValidator->validate($this->request)) {
-            return new JsonResponse(['errors' => ErrorMessage::errorMessages()], 400);
+        if (!$this->userValidator->validate($this->request)) {
+            return $this->errorMessagesJsonResponse();
         }
 
-        $tutor = new Tutor(
+        $user = new User(
             name: $this->request->inputs('name'),
             email: $this->request->inputs('email'),
             password: $this->passwordHash($this->request->inputs('password'))
         );
 
-        if (!$this->tutorRepository->save($tutor)) {
-            return new JsonResponse(['error' => 'Not possible to create tutor.'], 400);
+        if (!$this->userRepository->save($user)) {
+            return $this->errorJsonResponse('Not possible to create user.');
         }
 
-        return new JsonResponse($tutor, 201);
+        return new JsonResponse($user, 201);
     }
 
     /**
@@ -80,13 +82,14 @@ class TutorController extends Controller
      */
     public function find(): JsonResponse
     {
-        $tutor = $this->tutorRepository->find((int) $this->request->uriParams('id'));
+        $user = $this->userRepository->find((int) $this->request->uriParams('id'));
 
-        if (!$tutor instanceof Tutor) {
-            return new JsonResponse(['error' => 'Tutor not found.'], 404);
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'User not found.'], 404);
+            return $this->notFoundJsonResponse('User not found.');
         }
 
-        return new JsonResponse($tutor, 200);
+        return new JsonResponse($user, 200);
     }
 
     /**
@@ -94,40 +97,42 @@ class TutorController extends Controller
      */
     public function update(): JsonResponse
     {
-        if (!$this->tutorValidator->validate($this->request)) {
-            return new JsonResponse(['errors' => ErrorMessage::errorMessages()], 400);
+        if (!$this->userValidator->validate($this->request)) {
+            return $this->errorMessagesJsonResponse();
         }
 
-        $tutor = $this->tutorRepository->find((int) $this->request->uriParams('id'));
+        $user = $this->userRepository->find((int) $this->request->uriParams('id'));
 
-        if (!$tutor instanceof Tutor) {
-            return new JsonResponse(['error' => 'Tutor not found.'], 404);
+        if (!$user instanceof User) {
+            return $this->notFoundJsonResponse('User not found.');
         }
 
-        $newTutor = new Tutor(
-            name: $this->request->inputs('name') ?? $tutor->name(),
-            email: $this->request->inputs('email') ?? $tutor->email(),
-            password: $tutor->password(),
-            id: $tutor->id(),
-            picture: $this->request->files('picture')['hashname'] ?? $tutor->picture(),
-            phone: $this->request->inputs('phone') ?? $tutor->phone(),
-            city: $this->request->inputs('city') ?? $tutor->city(),
-            about: $this->request->inputs('about') ?? $tutor->about(),
-            created_at: $tutor->createdAt(),
-            updated_at: $tutor->updatedAt()
+        $newUser = new User(
+            name: $this->request->inputs('name') ?? $user->name(),
+            email: $this->request->inputs('email') ?? $user->email(),
+            emailVerified: $user->emailVerified(),
+            password: $user->password(),
+            id: $user->id(),
+            picture: $this->request->files('picture')['hashname'] ?? $user->picture(),
+            phone: $this->request->inputs('phone') ?? $user->phone(),
+            city: $this->request->inputs('city') ?? $user->city(),
+            about: $this->request->inputs('about') ?? $user->about(),
+            role: Role::from($this->request->inputs('role') ?? $user->roleValue()),
+            created_at: $user->createdAt(),
+            updated_at: $user->updatedAt()
         );
 
-        if (!$this->tutorRepository->save($newTutor)) {
-            return new JsonResponse(['error' => 'Error on update tutor.'], 400);
+        if (!$this->userRepository->save($newUser)) {
+            return $this->errorJsonResponse('Error on update user.');
         }
 
         if ($this->request->files('picture') !== null and !$this->storeFile($this->request->files('picture'))) {
-            return new JsonResponse(['error' => 'Error on storing files.'], 400);
+            return $this->errorJsonResponse('Error on storing files.');
         }
 
-        $this->deleteFile($tutor->picture());
+        $this->deleteFile($user->picture());
 
-        return new JsonResponse($newTutor, 200);
+        return new JsonResponse($newUser, 200);
     }
 
     /**
@@ -135,16 +140,16 @@ class TutorController extends Controller
      */
     public function remove(): JsonResponse
     {
-        $tutor = $this->tutorRepository->find((int) $this->request->uriParams('id'));
+        $user = $this->userRepository->find((int) $this->request->uriParams('id'));
 
-        if (!$tutor instanceof Tutor) {
-            return new JsonResponse(['error' => 'Tutor not found.'], 404);
+        if (!$user instanceof User) {
+            return $this->notFoundJsonResponse('User not found.');
         }
 
-        $this->tutorRepository->remove($tutor);
+        $this->userRepository->remove($user);
 
-        $this->deleteFile($tutor->picture());
+        $this->deleteFile($user->picture());
 
-        return new JsonResponse($tutor, 200);
+        return new JsonResponse($user, 200);
     }
 }

@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Validation;
 
 use Jayrods\ScubaPHP\Controller\Validation\Validator;
-use Jayrods\ScubaPHP\Entity\Tutor;
+use Jayrods\ScubaPHP\Entity\User\User;
 use Jayrods\ScubaPHP\Infrastructure\ErrorMessage;
 use Jayrods\ScubaPHP\Http\Core\Request;
-use Jayrods\ScubaPHP\Repository\TutorRepository\SQLiteTutorRepository;
-use Jayrods\ScubaPHP\Repository\TutorRepository\TutorRepository;
+use Jayrods\ScubaPHP\Http\Enum\HttpMethod;
+use Jayrods\ScubaPHP\Repository\UserRepository\SQLiteUserRepository;
+use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
-class TutorValidator implements Validator
+class UserValidator implements Validator
 {
     /**
      * 
@@ -26,14 +27,14 @@ class TutorValidator implements Validator
     /**
      * 
      */
-    private TutorRepository $userRepository;
+    private UserRepository $userRepository;
 
     /**
      * 
      */
     public function __construct()
     {
-        $this->userRepository = new SQLiteTutorRepository();
+        $this->userRepository = new SQLiteUserRepository();
     }
 
     /**
@@ -51,7 +52,7 @@ class TutorValidator implements Validator
             : true;
 
         $validation['email'] = $request->inputs('email')
-            ? $this->validateEmail(email: $request->inputs('email'), httpMethod: $request->httpMethod(), request: $request)
+            ? $this->validateEmail(email: $request->inputs('email'), request: $request)
             : true;
 
         $validation['password'] = ($request->inputs('password') and $request->inputs('password-confirm'))
@@ -112,7 +113,7 @@ class TutorValidator implements Validator
     /**
      * 
      */
-    private function validateEmail(string $email, string $httpMethod, Request $request): bool
+    private function validateEmail(string $email, Request $request): bool
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             ErrorMessage::add('email', 'Invalid email input.');
@@ -121,12 +122,12 @@ class TutorValidator implements Validator
 
         $tutor = $this->userRepository->findByEmail($email);
 
-        if ($httpMethod === 'POST' and $tutor instanceof Tutor) {
+        if ($request->httpMethod() == 'POST' and $tutor instanceof User) {
             ErrorMessage::add('email', 'Email already in use.');
             return false;
         }
 
-        if ($httpMethod !== 'POST' and $tutor instanceof Tutor and $tutor->id() != $request->uriParams('id')) {
+        if ($request->httpMethod() != 'POST' and $tutor instanceof User and $tutor->id() != $request->uriParams('id')) {
             ErrorMessage::add('email', 'Email already in use.');
             return false;
         }

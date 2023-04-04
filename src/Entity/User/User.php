@@ -9,7 +9,7 @@ use DomainException;
 use Jayrods\ScubaPHP\Entity\User\Role;
 use JsonSerializable;
 
-class Tutor implements JsonSerializable
+class User implements JsonSerializable
 {
     /**
      * 
@@ -62,6 +62,11 @@ class Tutor implements JsonSerializable
     private ?string $about = null;
 
     /**
+     * enum (User => 0, Admin => 1)
+     */
+    private Role $role;
+
+    /**
      * date and time format (Y-d-M H:i:s)
      */
     private ?DateTimeImmutable $created_at = null;
@@ -70,11 +75,6 @@ class Tutor implements JsonSerializable
      * date and time format (Y-d-M H:i:s)
      */
     private ?DateTimeImmutable $updated_at = null;
-
-    /**
-     * enum (User => 0, Admin => 1)
-     */
-    private Role $role;
 
     /**
      * 
@@ -113,7 +113,7 @@ class Tutor implements JsonSerializable
     public function identify(int $id): void
     {
         if (!is_null($this->id)) {
-            throw new DomainException('Tutor already has identity.');
+            throw new DomainException('User already has identity.');
         }
 
         $this->id = $id;

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Repository\UserRepository;
 
+use Jayrods\ScubaPHP\Entity\User\Role;
+use Jayrods\ScubaPHP\Entity\User\User;
 use Jayrods\ScubaPHP\Traits\PasswordHandler;
-use Jayrods\ScubaPHP\Entity\User;
 use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
 class JsonUserRepository implements UserRepository
@@ -15,7 +16,7 @@ class JsonUserRepository implements UserRepository
     /**
      * 
      */
-    private const USER_DATA_PATH = DATABASE_PATH . 'users.json';
+    private const USER_DATA_PATH = DATABASE_PATH . 'user.json';
 
     /**
      * 
@@ -35,15 +36,16 @@ class JsonUserRepository implements UserRepository
     private function flushUsers(array $users): int|bool
     {
         $users = json_encode($users);
+
         return file_put_contents(self::USER_DATA_PATH, $users);
     }
 
     /**
      * 
      */
-    public function save(User $user): int|bool
+    public function save(User $user): bool
     {
-        return $this->findByEmail($user->email())
+        return $this->find($user->id())
             ? $this->update($user)
             : $this->create($user);
     }
@@ -51,26 +53,27 @@ class JsonUserRepository implements UserRepository
     /**
      * 
      */
-    public function create(User $user): int|bool
+    private function create(User $user): bool
     {
         $users = $this->loadUsers();
         $users[] = $user;
 
-        return $this->flushUsers($users);
+        return (bool) $this->flushUsers($users);
     }
 
     /**
      * 
      */
-    public function update(User $currentUser): int|bool
+    private function update(User $currentUser): bool
     {
         $users = $this->loadUsers();
-
+        
         foreach ($users as $i => $user) {
-            if ($user->email() === $currentUser->email()) {
+            if ($user->id() === $currentUser->id()) {
+                $currentUser->updateDate();
                 $users[$i] = $currentUser;
 
-                return $this->flushUsers($users);
+                return (bool) $this->flushUsers($users);
             }
         }
 
@@ -80,15 +83,15 @@ class JsonUserRepository implements UserRepository
     /**
      * 
      */
-    public function remove(User $currentUser): int|bool
+    public function remove(User $currentUser): bool
     {
         $users = $this->loadUsers();
 
         foreach ($users as $i => $user) {
-            if ($user->email() === $currentUser->email()) {
+            if ($user->id() === $currentUser->id()) {
                 unset($users[$i]);
 
-                return $this->flushUsers([...$users]);
+                return (bool) $this->flushUsers([...$users]);
             }
         }
 
@@ -101,6 +104,22 @@ class JsonUserRepository implements UserRepository
     public function all(): array
     {
         return $this->loadUsers();
+    }
+
+    /**
+     * 
+     */
+    public function find(int $id): User|false
+    {
+        $users = $this->loadUsers();
+
+        foreach ($users as $user) {
+            if ($user->id() === $id) {
+                return $user;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -130,8 +149,16 @@ class JsonUserRepository implements UserRepository
             $users[] = new User(
                 name: $userData->name,
                 email: $userData->email,
+                emailVerified: $userData->emailVerified,
                 password: $userData->password,
-                verified: $userData->verified
+                id: $userData->id,
+                picture: $userData->picture,
+                phone: $userData->phone,
+                city: $userData->city,
+                about: $userData->about,
+                role: Role::from($userData->role),
+                created_at: $userData->created_at,
+                updated_at: $userData->updated_at,
             );
         }
 

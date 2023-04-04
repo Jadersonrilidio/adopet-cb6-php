@@ -5,19 +5,21 @@ $dsn = 'sqlite:' . dirname(__DIR__) . '/database/database.sqlite';
 
 $conn = new PDO($dsn);
 
-$createTableTutors = "CREATE TABLE IF NOT EXISTS tutors (
+$createTableUsers = "CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    email_verified BOOLEAN NOT NULL,
     password TEXT NOT NULL,
     picture TEXT,
     phone TEXT,
     city TEXT,
     about TEXT,
+    role INTEGER NOT NULL,
     created_at TEXT,
     updated_at TEXT
 )";
 
-$result = $conn->query($createTableTutors);
+$result = $conn->query($createTableUsers);
 
 var_dump($result);

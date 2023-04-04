@@ -26,10 +26,10 @@ return array(
     'fallback' => [Jayrods\ScubaPHP\Controller\NotFoundController::class, 'index'],
 
     // API Routes
-    'GET|/api/tutors' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'all'],
-    'GET|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'find'],
-    'POST|/api/tutors' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'store'],
-    'PUT|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update'],
-    'PATCH|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'update'],
-    'DELETE|/api/tutors/{id}' => [Jayrods\ScubaPHP\Controller\API\TutorController::class, 'remove'],
+    'GET|/api/users' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'all'],
+    'GET|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'find'],
+    'POST|/api/users' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'store'],
+    'PUT|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'update'],
+    'PATCH|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'update'],
+    'DELETE|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'remove'],
 );

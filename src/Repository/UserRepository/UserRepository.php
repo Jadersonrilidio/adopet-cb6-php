@@ -4,34 +4,29 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Repository\UserRepository;
 
-use Jayrods\ScubaPHP\Entity\User;
+use Jayrods\ScubaPHP\Entity\User\User;
 
 interface UserRepository
 {
     /**
      * 
      */
-    public function save(User $user): int|bool;
+    public function save(User $user): bool;
 
     /**
      * 
      */
-    public function create(User $user): int|bool;
-
-    /**
-     * 
-     */
-    public function update(User $currentUser): int|bool;
-
-    /**
-     * 
-     */
-    public function remove(User $currentUser): int|bool;
+    public function remove(User $user): bool;
 
     /**
      * 
      */
     public function all(): array;
+
+    /**
+     * 
+     */
+    public function find(int $id): User|false;
 
     /**
      * 

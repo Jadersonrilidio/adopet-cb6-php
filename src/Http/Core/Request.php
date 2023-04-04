@@ -154,8 +154,7 @@ class Request
      */
     private function handlePutVars(): void
     {
-        //test: does this conditional expression works fine?
-        if ($this->httpMethod === HttpMethod::Put or HttpMethod::Patch) {
+        if ($this->httpMethod === HttpMethod::Put or $this->httpMethod === HttpMethod::Patch) {
             $multipartParser = new HttpParser();
 
             $multipartParser->setContentType($this->contentType);

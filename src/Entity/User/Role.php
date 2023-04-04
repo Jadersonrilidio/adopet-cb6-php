@@ -2,9 +2,7 @@
 
 namespace Jayrods\ScubaPHP\Entity\User;
 
-use BackedEnum;
-
-enum Role: int implements BackedEnum
+enum Role: int
 {
 
     case User = 0;

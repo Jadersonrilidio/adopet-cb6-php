@@ -2,9 +2,7 @@
 
 namespace Jayrods\ScubaPHP\Http\Enum;
 
-use BackedEnum;
-
-enum HttpMethod: string implements BackedEnum
+enum HttpMethod: string
 {
     case Get = 'GET';
     case Post = 'POST';

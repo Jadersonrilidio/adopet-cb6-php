@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Infrastructure;
 
+use Jayrods\ScubaPHP\Entity\User\Role;
 use Jayrods\ScubaPHP\Traits\SSLEncryption;
-use Jayrods\ScubaPHP\Entity\User;
+use Jayrods\ScubaPHP\Entity\User\User;
 
 class Auth
 {
@@ -29,8 +30,16 @@ class Auth
         $sessionUser = new User(
             name: $user->name(),
             email: $user->email(),
+            emailVerified: $user->emailVerified(),
             password: null,
-            verified: $user->verified()
+            id: (int) $user->id(),
+            picture: $user->picture(),
+            phone: $user->phone(),
+            city: $user->city(),
+            about: $user->about(),
+            role: Role::from($user->role()),
+            created_at: $user->createdAt(),
+            updated_at: $user->updatedAt()
         );
 
         if (!$userData = $this->SSLCrypt($sessionUser)) {
@@ -57,8 +66,16 @@ class Auth
             self::$user = new User(
                 name: $userData->name,
                 email: $userData->email,
+                emailVerified: $userData->emailVerified,
                 password: null,
-                verified: $userData->verified
+                id: (int) $userData->id,
+                picture: $userData->picture,
+                phone: $userData->phone,
+                city: $userData->city,
+                about: $userData->about,
+                role: Role::from($userData->role),
+                created_at: $userData->createdAt,
+                updated_at: $userData->updatedAt
             );
 
             return self::$user;

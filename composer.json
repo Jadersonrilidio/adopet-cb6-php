@@ -29,7 +29,7 @@
             "php -S localhost:8001 -t public/"
         ],
         "dbinit": "php bin/db_init",
-        "dbcreate:tutor": "php bin/db_make_tutor",
-        "dbget:tutors": "php bin/db_get_tutors"
+        "dbcreate:user": "php bin/db_make_user",
+        "dbget:users": "php bin/db_get_users"
     }
 }
