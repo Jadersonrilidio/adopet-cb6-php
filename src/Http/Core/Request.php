@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Http\Core;
 
 use Jayrods\ScubaPHP\Infrastructure\Helper\HttpParser;
+use Jayrods\ScubaPHP\Http\Enum\HttpMethod;
 
 class Request
 {
     /**
      * 
      */
-    private string $httpMethod;
+    private HttpMethod $httpMethod;
 
     /**
      * 
@@ -62,7 +63,7 @@ class Request
      */
     public function run(): void
     {
-        $this->httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $this->httpMethod = HttpMethod::tryFrom($_SERVER['REQUEST_METHOD']) ?? HttpMethod::Get;
         $this->uri = $this->sanitizedUri();
         $this->contentType = $_SERVER['CONTENT_TYPE'] ?? 'text/html';
         $this->headers = getallheaders();
@@ -153,7 +154,8 @@ class Request
      */
     private function handlePutVars(): void
     {
-        if ($this->httpMethod === 'PUT' or $this->httpMethod === 'PATCH') {
+        //test: does this conditional expression works fine?
+        if ($this->httpMethod === HttpMethod::Put or HttpMethod::Patch) {
             $multipartParser = new HttpParser();
 
             $multipartParser->setContentType($this->contentType);
@@ -187,7 +189,7 @@ class Request
      */
     public function httpMethod(): string
     {
-        return $this->httpMethod;
+        return $this->httpMethod->value;
     }
 
     /**
@@ -263,7 +265,7 @@ class Request
     }
 
     /**
-     * //todo create a File object DTO to store data?
+     * 
      */
     public function files(string $param = null): mixed
     {
