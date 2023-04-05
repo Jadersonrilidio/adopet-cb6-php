@@ -1,0 +1,155 @@
+#!usr/bin/env php
+<?php
+
+use Jayrods\ScubaPHP\Entity\User\Role;
+
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+$dsn = 'sqlite:' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'database.sqlite';
+$conn = new PDO($dsn);
+
+$selectUsers = "SELECT * FROM users";
+
+$stmt = $conn->query($selectUsers);
+
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (!isset($argv[1]) or $argv[1] !== "table") {
+    print_r($users);
+    exit;
+}
+
+echo '#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#' . PHP_EOL;
+echo '|  Id  |      Name      |      Email     | Email Verified |    Password    |     Picture     |    Phone    |     City     |        About       |  Role  |      Created at     |      Updated at     |' . PHP_EOL;
+echo '| ---- | -------------- | -------------- | -------------- | -------------- | --------------- | ----------- | ------------ | ------------------ | ------ | ------------------- | ------------------- |' . PHP_EOL;
+
+foreach ($users as $user) {
+    echo '| ' . idColumn($user['id']);
+    echo '| ' . nameColumn($user['name']);
+    echo ' | ' . emailColumn($user['email']);
+    echo ' | ' . emailVerifiedColumn($user['email_verified']);
+    echo ' | ' . passwordColumn($user['password']);
+    echo ' | ' . pictureColumn($user['picture']);
+    echo ' | ' . phoneColumn($user['phone']);
+    echo ' | ' . cityColumn($user['city']);
+    echo ' | ' . aboutColumn($user['about']);
+    echo ' | ' . roleColumn(Role::from($user['role'])->toString());
+    echo ' | ' . createdAtColumn($user['created_at']);
+    echo ' | ' . updatedAtColumn($user['updated_at']);
+    echo ' | ' . PHP_EOL;
+}
+
+echo '#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#' . PHP_EOL;
+
+function idColumn($id)
+{
+    return str_pad($id, 5, " ", STR_PAD_BOTH);
+}
+
+function nameColumn($name)
+{
+    if (strlen($name) > 13) {
+        $name = substr($name, 0, 10) . '...';
+    }
+
+    return str_pad($name, 14, " ", STR_PAD_BOTH);
+}
+
+function emailColumn($email)
+{
+    if (strlen($email) > 13) {
+        $email = substr($email, 0, 10) . '...';
+    }
+
+    return str_pad($email, 14, " ", STR_PAD_BOTH);
+}
+
+function emailVerifiedColumn($emailVerified)
+{
+    $emailVerified = $emailVerified == 0 ? 'false' : 'true';
+
+    return str_pad($emailVerified, 14, " ", STR_PAD_BOTH);
+}
+
+function passwordColumn($password)
+{
+    if (isset($password)) {
+        return '**************';
+    }
+}
+
+function pictureColumn($picture)
+{
+    if (is_null($picture)) {
+        $picture = 'NULL';
+    }
+
+    if (strlen($picture) > 14) {
+        $picture = substr($picture, 0, 11) . '...';
+    }
+
+    return str_pad($picture, 15, " ", STR_PAD_BOTH);
+}
+
+function phoneColumn($phone)
+{
+    if (is_null($phone)) {
+        $phone = ' NULL';
+        return str_pad($phone, 11, " ", STR_PAD_BOTH);
+    }
+
+    return $phone;
+}
+
+function cityColumn($city)
+{
+    if (is_null($city)) {
+        $city = 'NULL';
+    }
+
+    if (strlen($city) > 11) {
+        $city = substr($city, 0, 8) . '...';
+    }
+
+    return str_pad($city, 12, " ", STR_PAD_BOTH);
+}
+
+function aboutColumn($about)
+{
+    if (is_null($about)) {
+        $about = 'NULL';
+    }
+
+    if (strlen($about) > 17) {
+        $about = substr($about, 0, 14) . '...';
+    }
+
+    return str_pad($about, 18, " ", STR_PAD_BOTH);
+}
+
+function roleColumn($role)
+{
+    if (is_null($role)) {
+        $role = 'NULL';
+    }
+
+    return str_pad($role, 6, " ", STR_PAD_BOTH);
+}
+
+function createdAtColumn($created_at)
+{
+    if (strlen($created_at) > 19) {
+        $created_at = substr($created_at, 0, 7);
+    }
+
+    return str_pad($created_at, 19, " ", STR_PAD_RIGHT);
+}
+
+function updatedAtColumn($updated_at)
+{
+    if (strlen($updated_at) > 19) {
+        $updated_at = substr($updated_at, 0, 7);
+    }
+
+    return str_pad($updated_at, 19, " ", STR_PAD_RIGHT);
+}
