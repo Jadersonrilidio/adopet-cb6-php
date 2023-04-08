@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Infrastructure;
 
+use Jayrods\ScubaPHP\Entity\State;
 use Jayrods\ScubaPHP\Entity\User\Role;
 use Jayrods\ScubaPHP\Traits\SSLEncryption;
 use Jayrods\ScubaPHP\Entity\User\User;
@@ -36,8 +37,9 @@ class Auth
             picture: $user->picture(),
             phone: $user->phone(),
             city: $user->city(),
+            state: $user->state(),
             about: $user->about(),
-            role: Role::from($user->role()),
+            role: $user->role(),
             created_at: $user->createdAt(),
             updated_at: $user->updatedAt()
         );
@@ -72,10 +74,11 @@ class Auth
                 picture: $userData->picture,
                 phone: $userData->phone,
                 city: $userData->city,
+                state: State::from($userData->state),
                 about: $userData->about,
                 role: Role::from($userData->role),
-                created_at: $userData->createdAt,
-                updated_at: $userData->updatedAt
+                created_at: $userData->created_at,
+                updated_at: $userData->update_at
             );
 
             return self::$user;

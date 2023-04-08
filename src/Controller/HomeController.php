@@ -21,16 +21,16 @@ class HomeController extends Controller
     /**
      * 
      */
-    public function __construct(Request $request, View $view, FlashMessage $flashMsg)
+    public function __construct(View $view, FlashMessage $flashMsg, Auth $auth)
     {
-        parent::__construct($request, $view, $flashMsg);
+        parent::__construct($view, $flashMsg);
 
-        $this->auth = new Auth();
+        $this->auth = $auth;
     }
     /**
      * 
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $user = $this->auth->authUser();
 

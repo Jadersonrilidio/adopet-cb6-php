@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller\Validation;
 
 use Jayrods\ScubaPHP\Controller\Validation\Validator;
+use Jayrods\ScubaPHP\Entity\State;
 use Jayrods\ScubaPHP\Entity\User\User;
 use Jayrods\ScubaPHP\Infrastructure\ErrorMessage;
 use Jayrods\ScubaPHP\Http\Core\Request;
-use Jayrods\ScubaPHP\Http\Enum\HttpMethod;
 use Jayrods\ScubaPHP\Repository\UserRepository\SQLiteUserRepository;
 use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 
@@ -32,9 +32,9 @@ class UserValidator implements Validator
     /**
      * 
      */
-    public function __construct()
+    public function __construct(SQLiteUserRepository $userRepository)
     {
-        $this->userRepository = new SQLiteUserRepository();
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -42,9 +42,6 @@ class UserValidator implements Validator
      */
     public function validate(Request $request): bool
     {
-        $inputs = $request->inputs();
-        $files = $request->files();
-
         $validation = [];
 
         $validation['name'] = $request->inputs('name')
@@ -60,7 +57,8 @@ class UserValidator implements Validator
             : true;
 
         $validation['passwordsMatch'] = ($request->inputs('password') and $request->inputs('password-confirm'))
-            ? $this->passwordsMatch(password: $request->inputs('password'), passwordConfirm: $request->inputs('password-confirm')) : true;
+            ? $this->passwordsMatch(password: $request->inputs('password'), passwordConfirm: $request->inputs('password-confirm'))
+            : true;
 
         $validation['picture'] = $request->files('picture')
             ? $this->validatePicture(picture: $request->files('picture'))
@@ -74,6 +72,10 @@ class UserValidator implements Validator
             ? $this->validateCity(city: $request->inputs('city'))
             : true;
 
+        $validation['state'] = $request->inputs('state')
+            ? $this->validateState(state: $request->inputs('state'))
+            : true;
+
         $validation['about'] = $request->inputs('about')
             ? $this->validateAbout(about: $request->inputs('about'))
             : true;
@@ -81,6 +83,9 @@ class UserValidator implements Validator
         return $this->check($validation);
     }
 
+    /**
+     * 
+     */
     private function check(array $validation): bool
     {
         foreach ($validation as $value) {
@@ -95,7 +100,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validateName(string $name): bool
+    public function validateName(string $name): bool
     {
         if (!preg_match('/^[a-zA-Z\s]+$/', $name)) {
             ErrorMessage::add('name', 'Invalid username.');
@@ -113,7 +118,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validateEmail(string $email, Request $request): bool
+    public function validateEmail(string $email, Request $request): bool
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             ErrorMessage::add('email', 'Invalid email input.');
@@ -143,7 +148,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validatePassword(string $password): bool
+    public function validatePassword(string $password): bool
     {
         if (!preg_match('/^[a-zA-Z0-9\.\_\#]+$/', $password)) {
             ErrorMessage::add('password', 'Invalid password input.');
@@ -166,7 +171,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function passwordsMatch(string $password, string $passwordConfirm): bool
+    public function passwordsMatch(string $password, string $passwordConfirm): bool
     {
         if ($password !== $passwordConfirm) {
             ErrorMessage::add('password', 'Passwords does not match.');
@@ -180,7 +185,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validatePicture(array $picture): bool
+    public function validatePicture(array $picture): bool
     {
         $realFile = $picture['tmp_name'];
         $realFileSize = filesize($realFile);
@@ -217,7 +222,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validatePhone(string $phone): bool
+    public function validatePhone(string $phone): bool
     {
         if (!is_numeric($phone)) {
             ErrorMessage::add('phone', 'Phone should be numeric.');
@@ -235,7 +240,7 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validateCity(string $city): bool
+    public function validateCity(string $city): bool
     {
         if (!preg_match('/^[a-zA-Z\s]+$/', $city)) {
             ErrorMessage::add('city', 'Invalid city name input.');
@@ -253,7 +258,20 @@ class UserValidator implements Validator
     /**
      * 
      */
-    private function validateAbout(string $about): bool
+    public function validateState(string $state): bool
+    {
+        if (State::tryFrom($state) === null) {
+            ErrorMessage::add('state', 'Invalid state.');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 
+     */
+    public function validateAbout(string $about): bool
     {
         if (!preg_match('/^[\w\d\s\,\.\?\!\:\;\"\']+$/', $about)) {
             ErrorMessage::add('about', 'Invalid about field input.');

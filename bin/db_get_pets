@@ -1,6 +1,10 @@
 #!usr/bin/env php
 <?php
 
+use Jayrods\ScubaPHP\Entity\Pet\Size;
+use Jayrods\ScubaPHP\Entity\Pet\Species;
+use Jayrods\ScubaPHP\Entity\Pet\Status;
+use Jayrods\ScubaPHP\Entity\Pet\State;
 use Jayrods\ScubaPHP\Entity\User\Role;
 
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
@@ -8,34 +12,36 @@ require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPAR
 $dsn = 'sqlite:' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'database.sqlite';
 $conn = new PDO($dsn);
 
-$selectUsers = "SELECT * FROM users";
+$selectPets = "SELECT * FROM pets";
 
-$stmt = $conn->query($selectUsers);
+$stmt = $conn->query($selectPets);
 
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$pets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (!isset($argv[1]) or $argv[1] !== "table") {
-    print_r($users);
+    print_r($pets);
     exit;
 }
+
+//todo table and rules
 
 echo '#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#' . PHP_EOL;
 echo '|  Id  |      Name      |      Email     | Email Verified |    Password    |     Picture     |    Phone    |     City     |        About       |  Role  |      Created at     |      Updated at     |' . PHP_EOL;
 echo '| ---- | -------------- | -------------- | -------------- | -------------- | --------------- | ----------- | ------------ | ------------------ | ------ | ------------------- | ------------------- |' . PHP_EOL;
 
-foreach ($users as $user) {
-    echo '| ' . idColumn($user['id']);
-    echo '| ' . nameColumn($user['name']);
-    echo ' | ' . emailColumn($user['email']);
-    echo ' | ' . emailVerifiedColumn($user['email_verified']);
-    echo ' | ' . passwordColumn($user['password']);
-    echo ' | ' . pictureColumn($user['picture']);
-    echo ' | ' . phoneColumn($user['phone']);
-    echo ' | ' . cityColumn($user['city']);
-    echo ' | ' . aboutColumn($user['about']);
-    echo ' | ' . roleColumn(Role::from($user['role'])->toString());
-    echo ' | ' . createdAtColumn($user['created_at']);
-    echo ' | ' . updatedAtColumn($user['updated_at']);
+foreach ($pets as $pet) {
+    echo '| ' . idColumn($pet['id']);
+    echo '| ' . nameColumn($pet['name']);
+    echo ' | ' . emailColumn($pet['email']);
+    echo ' | ' . emailVerifiedColumn($pet['email_verified']);
+    echo ' | ' . passwordColumn($pet['password']);
+    echo ' | ' . pictureColumn($pet['picture']);
+    echo ' | ' . phoneColumn($pet['phone']);
+    echo ' | ' . cityColumn($pet['city']);
+    echo ' | ' . aboutColumn($pet['about']);
+    echo ' | ' . roleColumn(Role::from($pet['role'])->toString());
+    echo ' | ' . createdAtColumn($pet['created_at']);
+    echo ' | ' . updatedAtColumn($pet['updated_at']);
     echo ' | ' . PHP_EOL;
 }
 

@@ -4,30 +4,27 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Repository\UserRepository;
 
+use Jayrods\ScubaPHP\Entity\State;
 use Jayrods\ScubaPHP\Entity\User\Role;
 use Jayrods\ScubaPHP\Entity\User\User;
+use Jayrods\ScubaPHP\Infrastructure\Database\PdoConnection;
 use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
 use PDO;
 use PDOStatement;
 
-class SQLiteUserRepository implements UserRepository
+class SqliteUserRepository implements UserRepository
 {
-    /**
-     * //todo: abstract database implementation
-     */
-    private const USER_DATABASE_PATH = DATABASE_PATH . 'database.sqlite';
-
     /**
      * 
      */
     private PDO $conn;
 
     /**
-     * //todo: abstract database implementation
+     * 
      */
-    public function __construct(?PDO $conn = null)
+    public function __construct(PdoConnection $connection)
     {
-        $this->conn = $conn ?? new PDO('sqlite:' . self::USER_DATABASE_PATH);
+        $this->conn = $connection->getConnection();
     }
 
     /**
@@ -54,7 +51,7 @@ class SQLiteUserRepository implements UserRepository
         $stmt->bindValue(':email', $user->email(), PDO::PARAM_STR);
         $stmt->bindValue(':email_verified', $user->emailVerified(), PDO::PARAM_BOOL);
         $stmt->bindValue(':password', $user->password(), PDO::PARAM_STR);
-        $stmt->bindValue(':role', $user->roleValue(), PDO::PARAM_INT);
+        $stmt->bindValue(':role', $user->role()->value, PDO::PARAM_INT);
         $stmt->bindValue(':created_at', $user->createdAt(), PDO::PARAM_STR);
         $stmt->bindValue(':updated_at', $user->updatedAt(), PDO::PARAM_STR);
 
@@ -73,13 +70,15 @@ class SQLiteUserRepository implements UserRepository
         $user->updateDate();
 
         $query = "UPDATE users
-            SET name = :name,
+            SET
+                name = :name,
                 email = :email,
                 email_verified = :email_verified,
                 password = :password,
                 picture = :picture,
                 phone = :phone,
                 city = :city,
+                state = :state,
                 about = :about,
                 role = :role,
                 created_at = :created_at,
@@ -96,8 +95,9 @@ class SQLiteUserRepository implements UserRepository
         $stmt->bindValue(':picture', $user->picture(), PDO::PARAM_STR);
         $stmt->bindValue(':phone', $user->phone(), PDO::PARAM_STR);
         $stmt->bindValue(':city', $user->city(), PDO::PARAM_STR);
+        $stmt->bindValue(':state', $user->state() ? $user->state()->value : null);
         $stmt->bindValue(':about', $user->about(), PDO::PARAM_STR);
-        $stmt->bindValue(':role', $user->role(), PDO::PARAM_INT);
+        $stmt->bindValue(':role', $user->role()->value, PDO::PARAM_INT);
         $stmt->bindValue(':created_at', $user->createdAt(), PDO::PARAM_STR);
         $stmt->bindValue(':updated_at', $user->updatedAt(), PDO::PARAM_STR);
 
@@ -109,7 +109,7 @@ class SQLiteUserRepository implements UserRepository
      */
     public function remove(User $user): bool
     {
-        $query = "DELETE FROM users WHERE users.id = :id";
+        $query = "DELETE FROM users WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
 
@@ -139,12 +139,11 @@ class SQLiteUserRepository implements UserRepository
             return false;
         }
 
-        $query = "SELECT * FROM users WHERE users.id = :id";
+        $query = "SELECT * FROM users WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-
 
         return $this->hidrateUser($stmt)[0] ?? false;
     }
@@ -154,9 +153,8 @@ class SQLiteUserRepository implements UserRepository
      */
     public function findByEmail(string $email): User|false
     {
-        $query = "SELECT * FROM users WHERE users.email = :email";
+        $query = "SELECT * FROM users WHERE email = :email";
 
-        $stmt = $this->conn->query($query);
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
@@ -177,10 +175,11 @@ class SQLiteUserRepository implements UserRepository
                 email: $userData['email'],
                 emailVerified: (bool) $userData['email_verified'],
                 password: $userData['password'],
-                id: $userData['id'],
+                id: (int) $userData['id'],
                 picture: $userData['picture'],
                 phone: $userData['phone'],
                 city: $userData['city'],
+                state: $userData['state'] ? State::tryFrom($userData['state']) : null,
                 about: $userData['about'],
                 role: Role::from($userData['role']),
                 created_at: $userData['created_at'],

@@ -34,6 +34,15 @@ CREATE TABLE IF NOT EXISTS pets (
     updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS adoptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    pet_id INTEGER NOT NULL,
+    status INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 -- species ENUM { dog, cat }
 -- size ENUM { Mini, Small, Medium, Large, Giant }
 -- status ENUM { New, Available, Adopted, Quarantine, Removed, Suspended }
@@ -59,7 +68,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone CHAR(11) NULL,
     city VARCHAR(128) NULL,
     about TEXT NULL,
-    role INT(3) NOT NULL DEFAULT 0,
+    role ENUM(0, 1, 2) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
 );
@@ -69,13 +78,22 @@ CREATE TABLE IF NOT EXISTS pets (
     user_id INT(11) NOT NULL,
     name VARCHAR(64) NOT NULL,
     description VARCHAR(128) NOT NULL,
-    species INT(3) NOT NULL,
-    size INT(3) NOT NULL,
-    status INT(3) NOT NULL,
+    species ENUM(0, 1, 2, 3) NOT NULL,
+    size ENUM(0, 1, 2, 3, 4, 5) NOT NULL,
+    status ENUM(0, 1, 2, 3, 4) NOT NULL,
     birth_date DATE NOT NULL,
     city VARCHAR(128) NOT NULL,
-    state VAR(2) NOT NULL,
+    state ENUM('AC','AM','AP','AL','MG','...') NOT NULL,
     picture_url VARCHAR(128) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS adoptions (
+    id INT(11) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    user_id INT(11) NOT NULL,
+    pet_id INT(11) NOT NULL,
+    status ENUM(0, 1, 2, 3, 4) NOT NULL,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
 );

@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Jayrods\ScubaPHP\Entity\User;
 
 enum Role: int
 {
 
-    case User = 0;
-    case Admin = 1;
+    case Tutor = 0;
+    case Shelter = 1;
+    case Admin = 2;
 
     /**
      * 
@@ -14,9 +17,9 @@ enum Role: int
     public function toString(): string
     {
         return match ($this) {
-            self::User => 'user',
-            self::Admin => 'admin',
-            default => 'user',
+            self::Tutor => 'tutor',
+            self::Shelter => 'shelter',
+            self::Admin => 'admin'
         };
     }
 }

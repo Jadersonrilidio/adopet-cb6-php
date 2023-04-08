@@ -32,4 +32,18 @@ return array(
     'PUT|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'update'],
     'PATCH|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'update'],
     'DELETE|/api/users/{id}' => [Jayrods\ScubaPHP\Controller\API\UserController::class, 'remove'],
+
+    'GET|/api/pets' => [Jayrods\ScubaPHP\Controller\API\PetController::class, 'all'],
+    'GET|/api/pets/{id}' => [Jayrods\ScubaPHP\Controller\API\PetController::class, 'find'],
+    'POST|/api/pets' => [Jayrods\ScubaPHP\Controller\API\PetController::class, 'store'],
+    'PUT|/api/pets/{id}' => [Jayrods\ScubaPHP\Controller\API\PetController::class, 'update'],
+    'PATCH|/api/pets/{id}' => [Jayrods\ScubaPHP\Controller\API\PetController::class, 'update'],
+    'DELETE|/api/pets/{id}' => [Jayrods\ScubaPHP\Controller\API\PetController::class, 'remove'],
+
+    'GET|/api/adoptions' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'all'],
+    'GET|/api/adoptions/{id}' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'find'],
+    'POST|/api/adoptions' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'store'],
+    'PUT|/api/adoptions/{id}/{status}' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'update'],
+    'PATCH|/api/adoptions/{id}/{status}' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'update'],
+    'DELETE|/api/adoptions/{id}' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'remove'],
 );

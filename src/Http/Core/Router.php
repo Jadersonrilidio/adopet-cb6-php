@@ -6,10 +6,9 @@ namespace Jayrods\ScubaPHP\Http\Core;
 
 use Jayrods\ScubaPHP\Http\Core\Request;
 use Jayrods\ScubaPHP\Http\Core\Response;
-use Jayrods\ScubaPHP\Http\Core\View;
 use Jayrods\ScubaPHP\Http\Middleware\MiddlewareQueue;
-use Jayrods\ScubaPHP\Infrastructure\FlashMessage;
 use Jayrods\ScubaPHP\Traits\JsonCache;
+use Psr\Container\ContainerInterface;
 
 class Router
 {
@@ -28,16 +27,21 @@ class Router
     /**
      * 
      */
+    private ContainerInterface $diContainer;
+
+    /**
+     * 
+     */
     private array $routes;
 
     /**
      * 
      */
-    public function __construct(Request $request, MiddlewareQueue $middlewareQueue, array $routes)
+    public function __construct(Request $request, MiddlewareQueue $middlewareQueue, ContainerInterface $diContainer, array $routes)
     {
         $this->request = $request;
         $this->middlewareQueue = $middlewareQueue;
-
+        $this->diContainer = $diContainer;
         $this->routes = $routes;
     }
 
@@ -54,13 +58,9 @@ class Router
 
         $this->executeMiddlewaresQueue($middlewares);
 
-        $controller = new $controller(
-            request: $this->request,
-            view: new View(),
-            flashMsg: new FlashMessage()
-        );
+        $controller = $this->diContainer->get($controller);
 
-        return $controller->$method();
+        return $controller->$method($this->request);
     }
 
     /**

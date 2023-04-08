@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Controller;
 
 use Jayrods\ScubaPHP\Controller\Controller;
+use Jayrods\ScubaPHP\Http\Core\Request;
 use Jayrods\ScubaPHP\Http\Core\Response;
 
 class NotFoundController extends Controller
@@ -12,7 +13,7 @@ class NotFoundController extends Controller
     /**
      * 
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $content = $this->view->renderView(template: 'not_found');
 

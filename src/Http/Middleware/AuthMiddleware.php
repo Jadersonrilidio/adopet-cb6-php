@@ -20,9 +20,9 @@ class AuthMiddleware implements Middleware
     /**
      * 
      */
-    public function __construct()
+    public function __construct(Auth $auth)
     {
-        $this->auth = new Auth();
+        $this->auth = $auth;
     }
 
     /**

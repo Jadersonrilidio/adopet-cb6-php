@@ -1,4 +1,4 @@
 vendor
 .env
 composer.lock
-VNOTES.txt
+VNOTES.md

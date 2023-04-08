@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace Jayrods\ScubaPHP\Entity\User;
 
-use DateTimeImmutable;
 use DomainException;
+use Jayrods\ScubaPHP\Entity\EntityWithDates;
+use Jayrods\ScubaPHP\Entity\State;
 use Jayrods\ScubaPHP\Entity\User\Role;
 use JsonSerializable;
 
-class User implements JsonSerializable
+class User extends EntityWithDates implements JsonSerializable
 {
-    /**
-     * 
-     */
-    private const DATETIME_FORMAT = 'Y-m-d H:i:s';
-
     /**
      * Auto_generated, if present, also MUST exist on database
      */
@@ -44,37 +40,32 @@ class User implements JsonSerializable
     /**
      * uploaded formats jpeg, jpg, png only
      */
-    private ?string $picture = null;
+    private ?string $picture;
 
     /**
      * only numeric and 11 digits XX X XXXX-XXXX
      */
-    private ?string $phone = null;
+    private ?string $phone;
 
     /**
      * Only letters upper/lower case, and space allowed
      */
-    private ?string $city = null;
+    private ?string $city;
+
+    /**
+     * Only State cases, string value
+     */
+    private ?State $state;
 
     /**
      * Only 'word' characters allowed
      */
-    private ?string $about = null;
+    private ?string $about;
 
     /**
      * enum (User => 0, Admin => 1)
      */
     private Role $role;
-
-    /**
-     * date and time format (Y-d-M H:i:s)
-     */
-    private ?DateTimeImmutable $created_at = null;
-
-    /**
-     * date and time format (Y-d-M H:i:s)
-     */
-    private ?DateTimeImmutable $updated_at = null;
 
     /**
      * 
@@ -88,11 +79,14 @@ class User implements JsonSerializable
         ?string $picture = null,
         ?string $phone = null,
         ?string $city = null,
+        ?State $state = null,
         ?string $about = null,
-        Role $role = Role::User,
+        Role $role = Role::Tutor,
         ?string $created_at = null,
         ?string $updated_at = null,
     ) {
+        parent::__construct($created_at, $updated_at);
+
         $this->name = $name;
         $this->email = $email;
         $this->emailVerified = $emailVerified;
@@ -101,10 +95,9 @@ class User implements JsonSerializable
         $this->picture = $picture;
         $this->phone = $phone;
         $this->city = $city;
+        $this->state = $state;
         $this->about = $about;
         $this->role = $role;
-        $this->created_at = $this->setCreatedAt($created_at);
-        $this->updated_at = $this->setUpdatedAt($updated_at);
     }
 
     /**
@@ -122,17 +115,9 @@ class User implements JsonSerializable
     /**
      * 
      */
-    public function verify(): void
+    public function verifyEmail(): void
     {
         $this->emailVerified = true;
-    }
-
-    /**
-     * 
-     */
-    public function updateDate()
-    {
-        $this->updated_at = new DateTimeImmutable('now');
     }
 
     /**
@@ -202,6 +187,14 @@ class User implements JsonSerializable
     /**
      * 
      */
+    public function state(): ?State
+    {
+        return $this->state;
+    }
+
+    /**
+     * 
+     */
     public function about(): ?string
     {
         return $this->about;
@@ -210,57 +203,33 @@ class User implements JsonSerializable
     /**
      * 
      */
-    public function role(): ?string
+    public function becomeTutor(): void
     {
-        return $this->role->name;
+        $this->role = Role::Tutor;
     }
 
     /**
      * 
      */
-    public function roleValue(): ?int
+    public function becomeShelter(): void
     {
-        return $this->role->value;
+        $this->role = Role::Shelter;
     }
 
     /**
      * 
      */
-    public function createdAt(): ?string
+    public function becomeAdmin(): void
     {
-        return $this->created_at->format(self::DATETIME_FORMAT);
+        $this->role = Role::Admin;
     }
 
     /**
      * 
      */
-    public function updatedAt(): ?string
+    public function role(): Role
     {
-        return $this->updated_at->format(self::DATETIME_FORMAT);
-    }
-
-    /**
-     * 
-     */
-    private function setCreatedAt(?string $created_at = null): DateTimeImmutable
-    {
-        if (is_null($created_at)) {
-            return new DateTimeImmutable('now');
-        }
-
-        return DateTimeImmutable::createFromFormat(self::DATETIME_FORMAT, $created_at);
-    }
-
-    /**
-     * 
-     */
-    private function setupdatedAt(?string $updated_at = null): DateTimeImmutable
-    {
-        if (is_null($updated_at)) {
-            return $this->created_at;
-        }
-
-        return DateTimeImmutable::createFromFormat(self::DATETIME_FORMAT, $updated_at);
+        return $this->role;
     }
 
     /**
@@ -277,6 +246,7 @@ class User implements JsonSerializable
             'picture' => $this->picture,
             'phone' => $this->phone,
             'city' => $this->city,
+            'state' => $this->state ? $this->state->value : null,
             'about' => $this->about,
             'role' => $this->role->value,
             'created_at' => $this->createdAt(),

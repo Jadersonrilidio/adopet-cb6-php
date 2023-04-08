@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Jayrods\ScubaPHP\Controller\Traits;
 
 use Jayrods\ScubaPHP\Http\Core\JsonResponse;
@@ -29,5 +31,13 @@ trait StandandJsonResponse
     public function notFoundJsonResponse(string $message = 'Not found'): JsonResponse
     {
         return new JsonResponse(['error' => $message], 404);
+    }
+
+    /**
+     * 
+     */
+    public function forbiddenJsonResponse(string $message = 'Forbidden'): JsonResponse
+    {
+        return new JsonResponse(['error' => $message], 403);
     }
 }

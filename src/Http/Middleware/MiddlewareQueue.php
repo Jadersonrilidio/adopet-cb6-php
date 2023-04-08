@@ -22,14 +22,14 @@ class MiddlewareQueue
     /**
      * 
      */
-    private array $middlewares = [];
+    private array $middlewares;
 
     /**
      * 
      */
-    public function __construct(array $middlewares = [])
+    public function __construct()
     {
-        $this->middlewares = array_merge(self::$default, $middlewares);
+        $this->middlewares = self::$default;
 
         if (empty(self::$map)) {
             self::$map = (include ROOT_DIR . SLASH . 'config' . SLASH . 'middlewares.php') ?? [];

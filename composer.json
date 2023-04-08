@@ -21,7 +21,8 @@
     },
     "require": {
         "phpmailer/phpmailer": "^6.8",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "php-di/php-di": "^7.0"
     },
     "scripts": {
         "serve": [
@@ -30,6 +31,8 @@
         ],
         "dbinit": "php bin/db_init",
         "dbcreate:user": "php bin/db_make_user",
-        "dbget:users": "php bin/db_get_users"
+        "dbcreate:pet": "php bin/db_make_pet",
+        "dbget:users": "php bin/db_get_users",
+        "dbget:pets": "php bin/db_get_pets"
     }
 }
