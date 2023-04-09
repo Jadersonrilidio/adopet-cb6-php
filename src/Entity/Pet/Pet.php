@@ -20,57 +20,57 @@ class Pet extends EntityWithDates implements JsonSerializable
     /**
      * 
      */
-    private ?int $id;
+    protected ?int $id;
 
     /**
      * 
      */
-    private int $user_id;
+    protected int $user_id;
 
     /**
      * 
      */
-    private string $name;
+    protected string $name;
 
     /**
      * 
      */
-    private string $description;
+    protected string $description;
 
     /**
      * 
      */
-    private Species $species;
+    protected Species $species;
 
     /**
      * 
      */
-    private Size $size;
+    protected Size $size;
 
     /**
      * 
      */
-    private Status $status;
+    protected Status $status;
 
     /**
      * 
      */
-    private DateTimeInterface $birth_date;
+    protected DateTimeInterface $birth_date;
 
     /**
      * 
      */
-    private string $city;
+    protected string $city;
 
     /**
      * 
      */
-    private State $state;
+    protected State $state;
 
     /**
      * 
      */
-    private string $picture;
+    protected string $picture;
 
     /**
      * 
@@ -214,7 +214,7 @@ class Pet extends EntityWithDates implements JsonSerializable
 
         $dateInterval = date_diff($today, $this->birth_date, true);
 
-        $format = $this->ageFormatStringBuilder($dateInterval);
+        $format = $this->ageFormatBuilder($dateInterval);
 
         return $dateInterval->format($format);
     }
@@ -222,7 +222,7 @@ class Pet extends EntityWithDates implements JsonSerializable
     /**
      * 
      */
-    private function ageFormatStringBuilder(DateInterval $dateInterval): string
+    private function ageFormatBuilder(DateInterval $dateInterval): string
     {
         $years = $dateInterval->y;
         $months = $dateInterval->m;

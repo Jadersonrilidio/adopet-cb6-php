@@ -37,8 +37,12 @@ class Router
     /**
      * 
      */
-    public function __construct(Request $request, MiddlewareQueue $middlewareQueue, ContainerInterface $diContainer, array $routes)
-    {
+    public function __construct(
+        Request $request,
+        MiddlewareQueue $middlewareQueue,
+        ContainerInterface $diContainer,
+        array $routes
+    ) {
         $this->request = $request;
         $this->middlewareQueue = $middlewareQueue;
         $this->diContainer = $diContainer;

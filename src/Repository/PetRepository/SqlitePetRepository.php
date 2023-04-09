@@ -11,11 +11,14 @@ use Jayrods\ScubaPHP\Entity\Pet\Status;
 use Jayrods\ScubaPHP\Entity\State;
 use Jayrods\ScubaPHP\Infrastructure\Database\PdoConnection;
 use Jayrods\ScubaPHP\Repository\PetRepository\PetRepository;
+use Jayrods\ScubaPHP\Traits\DatabaseTransactionControl;
 use PDO;
 use PDOStatement;
 
 class SqlitePetRepository implements PetRepository
 {
+    use DatabaseTransactionControl;
+
     /**
      * 
      */
@@ -46,7 +49,8 @@ class SqlitePetRepository implements PetRepository
     {
         $query = "INSERT INTO pets
             (name, description, user_id, species, size, status, birth_date, city, state, picture, created_at, updated_at)
-            VALUES (:name, :description, :user_id, :species, :size, :status, :birth_date, :city, :state, :picture, :created_at, :updated_at)";
+            VALUES
+            (:name, :description, :user_id, :species, :size, :status, :birth_date, :city, :state, :picture, :created_at, :updated_at)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -107,6 +111,25 @@ class SqlitePetRepository implements PetRepository
         $stmt->bindValue(':picture', $pet->picture(), PDO::PARAM_STR);
         $stmt->bindValue(':created_at', $pet->createdAt(), PDO::PARAM_STR);
         $stmt->bindValue(':updated_at', $pet->updatedAt(), PDO::PARAM_STR);
+        $stmt->bindValue(':id', $pet->id(), PDO::PARAM_STR);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * 
+     */
+    public function updateStatus(Pet $pet): bool
+    {
+        $pet->updateDate();
+
+        $query = "UPDATE pets SET status = :status, updated_at = :updated_at WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindValue(':status', $pet->status()->value, PDO::PARAM_INT);
+        $stmt->bindValue(':updated_at', $pet->updatedAt(), PDO::PARAM_STR);
+        $stmt->bindValue(':id', $pet->id(), PDO::PARAM_INT);
 
         return $stmt->execute();
     }
@@ -152,7 +175,6 @@ class SqlitePetRepository implements PetRepository
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
-
         return $this->hidratePet($stmt)[0] ?? false;
     }
 
@@ -167,8 +189,8 @@ class SqlitePetRepository implements PetRepository
             $pets[] = new Pet(
                 name: $petData['name'],
                 description: $petData['description'],
-                id: (int) $petData['id'],
-                user_id: (int) $petData['user_id'],
+                id: $petData['id'],
+                user_id: $petData['user_id'],
                 species: Species::from($petData['species']),
                 size: Size::from($petData['size']),
                 status: Status::from($petData['status']),

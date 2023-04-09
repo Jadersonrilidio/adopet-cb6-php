@@ -16,28 +16,23 @@ $builder = new ContainerBuilder();
 $builder->addDefinitions(array(
     SqliteUserRepository::class => function () {
         $sqlitePdoRepository = new SqlitePdoConnection();
-
         return new SqliteUserRepository($sqlitePdoRepository);
     },
     SqlitePetRepository::class => function () {
         $sqlitePdoRepository = new SqlitePdoConnection();
-
         return new SqlitePetRepository($sqlitePdoRepository);
     },
     SqliteAdoptionRepository::class => function () {
         $sqlitePdoRepository = new SqlitePdoConnection();
-
         return new SqliteAdoptionRepository($sqlitePdoRepository);
     },
     UserValidator::class => function () {
         $sqlitePdoRepository = new SqlitePdoConnection();
         $sqliteUserRepository = new SqliteUserRepository($sqlitePdoRepository);
-
         return new UserValidator($sqliteUserRepository);
     },
     MailService::class => function () {
         $mail = new PHPMailer(ENVIRONMENT === 'production' ? false : true);
-
         return new MailService($mail);
     }
 ));

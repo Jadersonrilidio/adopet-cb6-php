@@ -33,7 +33,7 @@ class Auth
             email: $user->email(),
             emailVerified: $user->emailVerified(),
             password: null,
-            id: (int) $user->id(),
+            id: $user->id(),
             picture: $user->picture(),
             phone: $user->phone(),
             city: $user->city(),

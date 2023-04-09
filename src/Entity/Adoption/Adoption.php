@@ -7,6 +7,8 @@ namespace Jayrods\ScubaPHP\Entity\Adoption;
 use DomainException;
 use Jayrods\ScubaPHP\Entity\Adoption\Status;
 use Jayrods\ScubaPHP\Entity\EntityWithDates;
+use Jayrods\ScubaPHP\Entity\Pet\Pet;
+use Jayrods\ScubaPHP\Entity\User\User;
 use JsonSerializable;
 
 class Adoption extends EntityWithDates implements JsonSerializable
@@ -14,22 +16,22 @@ class Adoption extends EntityWithDates implements JsonSerializable
     /**
      * 
      */
-    private ?int $id;
+    protected ?int $id;
 
     /**
      * 
      */
-    private int $user_id;
+    protected int $user_id;
 
     /**
      * 
      */
-    private int $pet_id;
+    protected int $pet_id;
 
     /**
      * 
      */
-    private Status $status;
+    protected Status $status;
 
     /**
      * 
@@ -145,7 +147,7 @@ class Adoption extends EntityWithDates implements JsonSerializable
             'pet_id' => $this->pet_id,
             'status' => $this->status->value,
             'created_at' => $this->createdAt(),
-            'updated_at' => $this->updatedAt(),
+            'updated_at' => $this->updatedAt()
         );
     }
 }

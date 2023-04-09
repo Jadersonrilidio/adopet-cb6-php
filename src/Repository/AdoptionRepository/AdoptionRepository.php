@@ -16,6 +16,11 @@ interface AdoptionRepository
     /**
      * 
      */
+    public function updateStatus(Adoption $adoption): bool;
+
+    /**
+     * 
+     */
     public function remove(Adoption $adoption): bool;
 
     /**

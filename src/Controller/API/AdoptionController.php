@@ -27,7 +27,7 @@ class AdoptionController extends Controller
     /**
      * 
      */
-    private AdoptionRepository $adoptionRepository;
+    private SqliteAdoptionRepository $adoptionRepository;
 
     /**
      * 
@@ -37,16 +37,18 @@ class AdoptionController extends Controller
     /**
      * 
      */
-    private PetRepository $petRepository;
+    private SqlitePetRepository $petRepository;
 
     /**
      * 
      */
-    public function __construct(SqliteAdoptionRepository $adoptionRepository, AdoptionValidator $adoptionValidator, SqlitePetRepository $petRepository)
-    {
+    public function __construct(
+        SqliteAdoptionRepository $adoptionRepository,
+        AdoptionValidator $adoptionValidator,
+        SqlitePetRepository $petRepository
+    ) {
         $this->adoptionRepository = $adoptionRepository;
         $this->adoptionValidator = $adoptionValidator;
-
         $this->petRepository = $petRepository;
     }
 
@@ -66,9 +68,9 @@ class AdoptionController extends Controller
     public function store(Request $request): JsonResponse
     {
         //todo: validate whether user request adoption
-        if ($this->auth->authUser('role') !== Role::Tutor) {
-            return $this->forbiddenJsonResponse();
-        }
+        // if ($this->auth->authUser('role') !== Role::Tutor) {
+        //     return $this->forbiddenJsonResponse();
+        // }
 
         $pet = $this->petRepository->find((int) $request->inputs('pet_id'));
 
@@ -77,20 +79,19 @@ class AdoptionController extends Controller
         }
 
         $newAdoption = new Adoption(
-            user_id: (int) $this->auth->authUser('id'),
-            pet_id: (int) $request->inputs('pet_id'),
-            status: AdoptionStatus::Requested
+            user_id: (int) $request->inputs('user_id') /*(int) $this->auth->authUser('id')*/,
+            pet_id: (int) $request->inputs('pet_id')
         );
 
         if (!$this->adoptionRepository->save($newAdoption)) {
             return $this->errorJsonResponse('Not possible to create adoption.');
         }
 
-        //test: update pet status after adoption request
+        //todo: update pet status after adoption request
 
         $pet->suspend();
 
-        if (!$this->petRepository->save($pet)) {
+        if (!$this->petRepository->updateStatus($pet)) {
             return $this->errorJsonResponse('Error on update pet status.');
         }
 
@@ -116,47 +117,46 @@ class AdoptionController extends Controller
     /**
      * 
      */
-    private function update(Request $request)
+    public function update(Request $request)
     {
         //todo: validate whether user change adoption & pet status
         // Tutor IS ABLE to cancel adoption ONLY
-        if ($this->auth->authUser('role') === Role::Tutor and AdoptionStatus::from((int) $request->uriParams('status')) !== AdoptionStatus::Canceled) {
-            return $this->forbiddenJsonResponse();
-        }
+        // if ($this->auth->authUser('role') === Role::Tutor and AdoptionStatus::from((int) $request->uriParams('status')) !== AdoptionStatus::Canceled) {
+        //     return $this->forbiddenJsonResponse();
+        // }
 
         // Shelter IS ABLE to confirm or reprove adoption
-        if ($this->auth->authUser('role') === Role::Shelter and (AdoptionStatus::from((int) $request->uriParams('status')) !== AdoptionStatus::Adopted or Status::from((int) $request->uriParams('status')) !== Status::Reproved)) {
-            return $this->forbiddenJsonResponse();
+        // if ($this->auth->authUser('role') === Role::Shelter and (AdoptionStatus::from((int) $request->uriParams('status')) !== AdoptionStatus::Adopted or Status::from((int) $request->uriParams('status')) !== Status::Reproved)) {
+        //     return $this->forbiddenJsonResponse();
+        // }
+
+        if (!$this->adoptionValidator->validate($request)) {
+            return $this->errorMessagesJsonResponse();
         }
 
-        $adoption = $this->adoptionRepository->find((int) $request->uriParams('id'));
+        $adoptionWithPet = $this->adoptionRepository->findWithPet((int) $request->uriParams('id'));
+
+        $adoption = $adoptionWithPet['adoption'];
+        $pet = $adoptionWithPet['pet'];
 
         if (!$adoption instanceof Adoption) {
             return $this->notFoundJsonResponse('Adoption not found.');
         }
 
-        $pet = $this->petRepository->find($adoption->petId());
-
         if (!$pet instanceof Pet) {
             return $this->notFoundJsonResponse('Pet not found.');
         }
 
-        if ($this->adoptionValidator->validateStatus((int) $request->uriParams('status'))) {
-            return $this->errorMessagesJsonResponse();
-        }
-
-        $status = AdoptionStatus::from((int) $request->uriParams('status'));
+        $status = AdoptionStatus::from((int) $request->inputs('status'));
 
         $this->changeAdoptionStatus($status, $adoption);
         $this->changePetStatus($status, $pet);
 
-        $adoption->updateDate();
-
-        if (!$this->adoptionRepository->save($adoption)) {
+        if (!$this->adoptionRepository->updateStatus($adoption)) {
             return $this->errorJsonResponse('Error on update adoption status.');
         }
 
-        if (!$this->petRepository->save($pet)) {
+        if (!$this->petRepository->updateStatus($pet)) {
             return $this->errorJsonResponse('Error on update pet status.');
         }
 

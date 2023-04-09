@@ -13,59 +13,59 @@ use JsonSerializable;
 class User extends EntityWithDates implements JsonSerializable
 {
     /**
-     * Auto_generated, if present, also MUST exist on database
+     * 
      */
-    private ?int $id;
+    protected ?int $id;
 
     /**
-     * Only letters upper/lower case, and space allowed
+     * 
      */
-    private string $name;
+    protected string $name;
 
     /**
-     * email format example@mail.com
+     * 
      */
-    private string $email;
+    protected string $email;
 
     /**
-     * boolean
+     * 
      */
-    private bool $emailVerified;
+    protected bool $emailVerified;
 
     /**
-     * number of characters? symbols allowed? numbers? UpperCase?
+     * 
      */
-    private ?string $password;
+    protected ?string $password;
 
     /**
-     * uploaded formats jpeg, jpg, png only
+     * 
      */
-    private ?string $picture;
+    protected ?string $picture;
 
     /**
-     * only numeric and 11 digits XX X XXXX-XXXX
+     * 
      */
-    private ?string $phone;
+    protected ?string $phone;
 
     /**
-     * Only letters upper/lower case, and space allowed
+     * 
      */
-    private ?string $city;
+    protected ?string $city;
 
     /**
-     * Only State cases, string value
+     * 
      */
-    private ?State $state;
+    protected ?State $state;
 
     /**
-     * Only 'word' characters allowed
+     * 
      */
-    private ?string $about;
+    protected ?string $about;
 
     /**
-     * enum (User => 0, Admin => 1)
+     * 
      */
-    private Role $role;
+    protected Role $role;
 
     /**
      * 

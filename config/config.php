@@ -6,7 +6,6 @@ use Dotenv\Dotenv;
 use Jayrods\ScubaPHP\Http\Middleware\MiddlewareQueue;
 
 // Global constants definition
-
 define('ROOT_DIR', dirname(__DIR__));
 define('SLASH', DIRECTORY_SEPARATOR);
 
@@ -21,11 +20,9 @@ define('DATE_FORMAT', 'Y-m-d');
 define('DATETIME_FORMAT', 'Y-m-d H:i:s');
 
 // Global flash message constants
-
 define('FLASH', 'flash_message');
 
 // Environment variables loading
-
 $dotenv = Dotenv::createImmutable(
     paths: ROOT_DIR
 );
@@ -33,13 +30,11 @@ $dotenv = Dotenv::createImmutable(
 $dotenv->load();
 
 // .env global constants definition
-
 define('APP_URL', env('APP_URL', 'http://localhost:8000'));
 define('ENVIRONMENT', env('ENVIRONMENT', 'production'));
 define('CACHE_EXPIRATION_TIME', env('CACHE_EXPIRATION_TIME', 30));
 
 // Middlewares mapping and settings
-
 MiddlewareQueue::setMap(
     map: include ROOT_DIR . SLASH . 'config' . SLASH . 'middlewares.php'
 );

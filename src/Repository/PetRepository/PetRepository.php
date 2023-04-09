@@ -16,6 +16,11 @@ interface PetRepository
     /**
      * 
      */
+    public function updateStatus(Pet $pet): bool;
+
+    /**
+     * 
+     */
     public function remove(Pet $pet): bool;
 
     /**

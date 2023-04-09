@@ -18,11 +18,11 @@ class AdoptionValidator implements Validator
     {
         $validation = [];
 
-        $validation['status'] = ($request->inputs('status'))
+        $validation['status'] = $request->inputs('status')
             ? $this->validateStatus(status: (int) $request->inputs('status'))
             : true;
 
-        $validation['pet_id'] = ($request->inputs('pet_id'))
+        $validation['pet_id'] = $request->inputs('pet_id')
             ? $this->validatePetId(pet_id: (int) $request->inputs('pet_id'))
             : true;
 

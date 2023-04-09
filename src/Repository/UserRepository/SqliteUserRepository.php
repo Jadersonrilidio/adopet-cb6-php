@@ -9,11 +9,14 @@ use Jayrods\ScubaPHP\Entity\User\Role;
 use Jayrods\ScubaPHP\Entity\User\User;
 use Jayrods\ScubaPHP\Infrastructure\Database\PdoConnection;
 use Jayrods\ScubaPHP\Repository\UserRepository\UserRepository;
+use Jayrods\ScubaPHP\Traits\DatabaseTransactionControl;
 use PDO;
 use PDOStatement;
 
 class SqliteUserRepository implements UserRepository
 {
+    use DatabaseTransactionControl;
+
     /**
      * 
      */
@@ -87,7 +90,7 @@ class SqliteUserRepository implements UserRepository
 
         $stmt = $this->conn->prepare($query);
 
-        $stmt->bindValue(':id', (int) $user->id(), PDO::PARAM_INT);
+        $stmt->bindValue(':id', $user->id(), PDO::PARAM_INT);
         $stmt->bindValue(':name', $user->name(), PDO::PARAM_STR);
         $stmt->bindValue(':email', $user->email(), PDO::PARAM_STR);
         $stmt->bindValue(':email_verified', $user->emailVerified(), PDO::PARAM_BOOL);
@@ -175,7 +178,7 @@ class SqliteUserRepository implements UserRepository
                 email: $userData['email'],
                 emailVerified: (bool) $userData['email_verified'],
                 password: $userData['password'],
-                id: (int) $userData['id'],
+                id: $userData['id'],
                 picture: $userData['picture'],
                 phone: $userData['phone'],
                 city: $userData['city'],

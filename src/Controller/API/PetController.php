@@ -17,7 +17,6 @@ use Jayrods\ScubaPHP\Entity\State;
 use Jayrods\ScubaPHP\Http\Core\Request;
 use Jayrods\ScubaPHP\Http\Core\JsonResponse;
 use Jayrods\ScubaPHP\Repository\PetRepository\SqlitePetRepository;
-use Jayrods\ScubaPHP\Repository\PetRepository\PetRepository;
 
 class PetController extends Controller
 {
@@ -28,7 +27,7 @@ class PetController extends Controller
     /**
      * 
      */
-    private PetRepository $petRepository;
+    private SqlitePetRepository $petRepository;
 
     /**
      * 
@@ -71,7 +70,7 @@ class PetController extends Controller
         $pet = new Pet(
             name: $request->inputs('name'),
             description: $request->inputs('description'),
-            user_id: (int) $request->inputs('user_id') /*(int) $this->auth->authUser('id')*/,
+            user_id: (int) $request->inputs('user_id') /*(int) $this->auth->authUser('id')*/, //todo
             species: Species::from((int) $request->inputs('species')),
             size: Size::from((int) $request->inputs('size')),
             status: Status::Available,
@@ -111,33 +110,38 @@ class PetController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
+        //todo: STEP01 - validate whether user can create a pet
+        // if ($this->auth->authUser('role') !== Role::Shelter) {
+        //     return $this->forbiddenJsonResponse();
+        // }
+
         if (!$this->petValidator->validate($request)) {
             return $this->errorMessagesJsonResponse();
         }
 
         $pet = $this->petRepository->find((int) $request->uriParams('id'));
 
-        //todo: validate whether user can update a pet
-        // if ($pet->userId() != $this->auth->authUser('id')) {
-        //     return $this->forbiddenJsonResponse();
-        // }
-
         if (!$pet instanceof Pet) {
             return $this->notFoundJsonResponse('Pet not found.');
         }
 
+        //todo: STEP02 - validate whether user can update a pet
+        // if ($pet->userId() != $this->auth->authUser('id')) {
+        //     return $this->forbiddenJsonResponse();
+        // }
+
         $updatedPet = new Pet(
             name: $request->inputs('name') ?? $pet->name(),
             description: $request->inputs('description') ?? $pet->description(),
-            id: (int) $pet->id(),
-            user_id: (int) $pet->userId(),
-            species: Species::from((int) $request->inputs('species') ?? $pet->species()->value),
-            size: Size::from((int) $request->inputs('size') ?? $pet->size()->value),
-            status: $pet->status(),
+            id: $pet->id(),
+            user_id: $pet->userId(),
+            species: is_null($request->inputs('species')) ? $pet->species() : Species::from((int) $request->inputs('species')),
+            size: is_null($request->inputs('size')) ? $pet->size() : Size::from((int) $request->inputs('size')),
+            status: is_null($request->inputs('status')) ? $pet->status() : Status::from((int) $request->inputs('status')),
             birth_date: $request->inputs('birth_date') ?? $pet->birthDate(),
             picture: $request->files('picture')['hashname'] ?? $pet->picture(),
             city: $request->inputs('city') ?? $pet->city(),
-            state: State::from($request->inputs('state') ?? $pet->state()->value),
+            state: is_null($request->inputs('state')) ? $pet->state() : State::from($request->inputs('state')),
             created_at: $pet->createdAt(),
             updated_at: $pet->updatedAt(),
         );
@@ -150,11 +154,8 @@ class PetController extends Controller
             return $this->errorJsonResponse('Error on storing files.');
         }
 
-        if ($request->files('picture') !== null) {
-            $result = $this->deleteFile($pet->picture());
-            if (!$result) {
-                return $this->errorJsonResponse('Error on deleting files.');
-            }
+        if ($request->files('picture') !== null and !$this->deleteFile($pet->picture())) {
+            return $this->errorJsonResponse('Error on deleting files.');
         }
 
         return new JsonResponse($updatedPet, 200);
@@ -176,9 +177,13 @@ class PetController extends Controller
             return $this->notFoundJsonResponse('Pet not found.');
         }
 
-        $this->petRepository->remove($pet);
+        if (!$this->petRepository->remove($pet)) {
+            return $this->errorJsonResponse('Error on removing pet.');
+        }
 
-        $this->deleteFile($pet->picture());
+        if ($pet->picture() !== null and !$this->deleteFile($pet->picture())) {
+            return $this->errorJsonResponse('Error on deleting files.');
+        }
 
         return new JsonResponse($pet, 200);
     }
