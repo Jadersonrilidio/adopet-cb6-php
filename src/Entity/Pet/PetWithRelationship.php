@@ -54,9 +54,31 @@ class PetWithRelationship extends Pet
     /**
      * 
      */
+    public function petWithoutRelationship(): Pet
+    {
+        return new Pet(
+            id: $this->id,
+            user_id: $this->user_id,
+            name: $this->name,
+            description: $this->description,
+            picture: $this->picture,
+            species: $this->species,
+            size: $this->size,
+            status: $this->status,
+            city: $this->city,
+            state: $this->state,
+            birth_date: $this->birthDate(),
+            created_at: $this->createdAt(),
+            updated_at: $this->updatedAt()
+        );
+    }
+
+    /**
+     * 
+     */
     public function jsonSerialize(): mixed
     {
-        return array(
+        $petArray = array(
             'id' => $this->id,
             'user_id' => $this->user_id,
             'name' => $this->name,
@@ -69,9 +91,17 @@ class PetWithRelationship extends Pet
             'state' => $this->state->value,
             'picture' => $this->picture,
             'created_at' => $this->createdAt(),
-            'updated_at' => $this->updatedAt(),
-            'adoption' => $this->adoption,
-            'user' => $this->user
+            'updated_at' => $this->updatedAt()
         );
+
+        if (!is_null($this->adoption)) {
+            $petArray['adoption'] = $this->adoption;
+        }
+
+        if (!is_null($this->user)) {
+            $petArray['user'] = $this->user;
+        }
+
+        return $petArray;
     }
 }

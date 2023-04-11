@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Jayrods\ScubaPHP\Repository\AdoptionRepository;
 
 use Jayrods\ScubaPHP\Entity\Adoption\Adoption;
-use Jayrods\ScubaPHP\Entity\Adoption\AdoptionWithRelationships;
+use Jayrods\ScubaPHP\Entity\Adoption\AdoptionWithRelationship;
 use Jayrods\ScubaPHP\Entity\Adoption\Status;
 use Jayrods\ScubaPHP\Entity\Pet\Status as PetStatus;
 use Jayrods\ScubaPHP\Entity\Pet\Pet;
@@ -165,7 +165,53 @@ class SqliteAdoptionRepository implements AdoptionRepository
     /**
      * 
      */
-    public function findWithPet(?int $id): array
+    public function allWithRelationship(): array
+    {
+        $query = "SELECT
+                A.id AS adoption_id,
+                A.user_id AS adoption_user_id,
+                A.user_id AS adoption_pet_id,
+                A.status AS adoption_status,
+                A.created_at AS adoption_created_at,
+                A.updated_at AS adoption_updated_at,
+                P.id AS pet_id,
+                P.name AS pet_name,
+                P.description AS pet_description,
+                P.user_id AS pet_user_id,
+                P.picture AS pet_picture,
+                P.species AS pet_species,
+                P.size AS pet_size,
+                P.status AS pet_status,
+                P.city AS pet_city,
+                P.state AS pet_state,
+                P.birth_date AS pet_birth_date,
+                P.created_at as pet_created_at,
+                P.updated_at as pet_updated_at,
+                U.id AS user_id,
+                U.name AS user_name,
+                U.email AS user_email,
+                U.email_verified AS user_email_verified,
+                U.picture AS user_picture,
+                U.phone AS user_phone,
+                U.city AS user_city,
+                U.state AS user_state,
+                U.about AS user_about,
+                U.role AS user_role,
+                U.created_at as user_created_at,
+                U.updated_at as user_updated_at
+            FROM adoptions AS A
+            INNER JOIN pets AS P ON P.id = A.pet_id
+            INNER JOIN users AS U ON U.id = A.user_id";
+
+        $stmt = $this->conn->query($query);
+
+        return $this->hidrateAdoption($stmt) ?? [];
+    }
+
+    /**
+     * 
+     */
+    public function findWithRelationship(?int $id): AdoptionWithRelationship
     {
         if (is_null($id)) {
             return false;
@@ -190,10 +236,22 @@ class SqliteAdoptionRepository implements AdoptionRepository
                 P.state AS pet_state,
                 P.birth_date AS pet_birth_date,
                 P.created_at as pet_created_at,
-                P.updated_at as pet_updated_at
+                P.updated_at as pet_updated_at,
+                U.id AS user_id,
+                U.name AS user_name,
+                U.email AS user_email,
+                U.email_verified AS user_email_verified,
+                U.picture AS user_picture,
+                U.phone AS user_phone,
+                U.city AS user_city,
+                U.state AS user_state,
+                U.about AS user_about,
+                U.role AS user_role,
+                U.created_at as user_created_at,
+                U.updated_at as user_updated_at
             FROM adoptions AS A
-            INNER JOIN pets AS P
-                ON P.id = A.pet_id
+            INNER JOIN pets AS P ON P.id = A.pet_id
+            INNER JOIN users AS U ON U.id = A.user_id
             WHERE A.id = :id";
 
         $stmt = $this->conn->prepare($query);
@@ -232,7 +290,7 @@ class SqliteAdoptionRepository implements AdoptionRepository
         $adoptions = [];
 
         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $adoption = new AdoptionWithRelationships(
+            $adoption = new AdoptionWithRelationship(
                 id: $data['adoption_id'],
                 user_id: $data['adoption_user_id'],
                 pet_id: $data['adoption_pet_id'],
@@ -241,8 +299,8 @@ class SqliteAdoptionRepository implements AdoptionRepository
                 updated_at: $data['adoption_updated_at']
             );
 
-            $pet = array_key_exists('pet_id', $data)
-                ? new Pet(
+            if (array_key_exists('pet_id', $data)) {
+                $adoption->addPet(new Pet(
                     name: $data['pet_name'],
                     description: $data['pet_description'],
                     id: $data['pet_id'],
@@ -256,10 +314,11 @@ class SqliteAdoptionRepository implements AdoptionRepository
                     state: State::from($data['pet_state']),
                     created_at: $data['pet_created_at'],
                     updated_at: $data['pet_updated_at']
-                ) : null;
+                ));
+            }
 
-            $user = array_key_exists('user_id', $data)
-                ? new User(
+            if (array_key_exists('user_id', $data)) {
+                $adoption->addUser(new User(
                     name: $data['user_name'],
                     email: $data['user_email'],
                     emailVerified: (bool) $data['user_email_verified'],
@@ -273,10 +332,8 @@ class SqliteAdoptionRepository implements AdoptionRepository
                     role: Role::from($data['user_role']),
                     created_at: $data['user_created_at'],
                     updated_at: $data['user_updated_at'],
-                ) : null;
-
-            $adoption->addPet($pet);
-            $adoption->addUser($user);
+                ));
+            }
 
             $adoptions[] = $adoption;
         }

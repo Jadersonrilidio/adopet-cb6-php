@@ -9,7 +9,7 @@ use Jayrods\ScubaPHP\Entity\Adoption\Adoption;
 use Jayrods\ScubaPHP\Entity\Pet\Pet;
 use Jayrods\ScubaPHP\Entity\User\User;
 
-class AdoptionWithRelationships extends Adoption
+class AdoptionWithRelationship extends Adoption
 {
     /**
      * 
@@ -64,17 +64,40 @@ class AdoptionWithRelationships extends Adoption
     /**
      * 
      */
+    public function adoption(): Adoption
+    {
+        return new Adoption(
+            id: $this->id,
+            user_id: $this->user_id,
+            pet_id: $this->pet_id,
+            status: $this->status,
+            created_at: $this->createdAt(),
+            updated_at: $this->updatedAt(),
+        );
+    }
+
+    /**
+     * 
+     */
     public function jsonSerialize(): mixed
     {
-        return array(
+        $adoptionArray = array(
             'id' => $this->id,
             'user_id' => $this->user_id,
             'pet_id' => $this->pet_id,
             'status' => $this->status->value,
             'created_at' => $this->createdAt(),
-            'updated_at' => $this->updatedAt(),
-            'user' => $this->user,
-            'pet' => $this->pet
+            'updated_at' => $this->updatedAt()
         );
+
+        if (!is_null($this->pet)) {
+            $adoptionArray['pet'] = $this->pet;
+        }
+
+        if (!is_null($this->user)) {
+            $adoptionArray['user'] = $this->user;
+        }
+
+        return $adoptionArray;
     }
 }

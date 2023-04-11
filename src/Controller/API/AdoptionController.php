@@ -9,6 +9,7 @@ use Jayrods\ScubaPHP\Controller\Traits\StandandJsonResponse;
 use Jayrods\ScubaPHP\Traits\PasswordHandler;
 use Jayrods\ScubaPHP\Controller\Validation\AdoptionValidator;
 use Jayrods\ScubaPHP\Entity\Adoption\Adoption;
+use Jayrods\ScubaPHP\Entity\Adoption\AdoptionWithRelationship;
 use Jayrods\ScubaPHP\Entity\Adoption\Status as AdoptionStatus;
 use Jayrods\ScubaPHP\Entity\Pet\Pet;
 use Jayrods\ScubaPHP\Entity\Pet\Status as PetStatus;
@@ -18,16 +19,18 @@ use Jayrods\ScubaPHP\Repository\AdoptionRepository\SqliteAdoptionRepository;
 use Jayrods\ScubaPHP\Repository\AdoptionRepository\AdoptionRepository;
 use Jayrods\ScubaPHP\Repository\PetRepository\PetRepository;
 use Jayrods\ScubaPHP\Repository\PetRepository\SqlitePetRepository;
+use Jayrods\ScubaPHP\Traits\DatabaseTransactionControl;
 
 class AdoptionController extends Controller
 {
     use PasswordHandler,
-        StandandJsonResponse;
+        StandandJsonResponse,
+        DatabaseTransactionControl;
 
     /**
      * 
      */
-    private SqliteAdoptionRepository $adoptionRepository;
+    private AdoptionRepository $adoptionRepository;
 
     /**
      * 
@@ -37,7 +40,7 @@ class AdoptionController extends Controller
     /**
      * 
      */
-    private SqlitePetRepository $petRepository;
+    private PetRepository $petRepository;
 
     /**
      * 
@@ -83,7 +86,10 @@ class AdoptionController extends Controller
             pet_id: (int) $request->inputs('pet_id')
         );
 
+        $this->beginTransaction();
+
         if (!$this->adoptionRepository->save($newAdoption)) {
+            $this->rollback();
             return $this->errorJsonResponse('Not possible to create adoption.');
         }
 
@@ -92,8 +98,11 @@ class AdoptionController extends Controller
         $pet->suspend();
 
         if (!$this->petRepository->updateStatus($pet)) {
+            $this->rollback();
             return $this->errorJsonResponse('Error on update pet status.');
         }
+
+        $this->commit();
 
         //todo: Database must commit all saved changes at once or roll back modifications
 
@@ -134,12 +143,11 @@ class AdoptionController extends Controller
             return $this->errorMessagesJsonResponse();
         }
 
-        $adoptionWithPet = $this->adoptionRepository->findWithPet((int) $request->uriParams('id'));
+        $adoptionWithRelationship = $this->adoptionRepository->findWithRelationship((int) $request->uriParams('id'));
 
-        $adoption = $adoptionWithPet['adoption'];
-        $pet = $adoptionWithPet['pet'];
+        $pet = $adoptionWithRelationship->pet();
 
-        if (!$adoption instanceof Adoption) {
+        if (!$adoptionWithRelationship instanceof Adoption) {
             return $this->notFoundJsonResponse('Adoption not found.');
         }
 
@@ -149,20 +157,26 @@ class AdoptionController extends Controller
 
         $status = AdoptionStatus::from((int) $request->inputs('status'));
 
-        $this->changeAdoptionStatus($status, $adoption);
+        $this->changeAdoptionStatus($status, $adoptionWithRelationship);
         $this->changePetStatus($status, $pet);
 
-        if (!$this->adoptionRepository->updateStatus($adoption)) {
+        $this->beginTransaction();
+
+        if (!$this->adoptionRepository->updateStatus($adoptionWithRelationship)) {
+            $this->rollback();
             return $this->errorJsonResponse('Error on update adoption status.');
         }
 
         if (!$this->petRepository->updateStatus($pet)) {
+            $this->rollback();
             return $this->errorJsonResponse('Error on update pet status.');
         }
 
+        $this->commit();
+
         //todo: Database must commit all saved changes at once or roll back modifications
 
-        return new JsonResponse($adoption, 200);
+        return new JsonResponse($adoptionWithRelationship->adoption(), 200);
     }
 
     /**
@@ -201,28 +215,34 @@ class AdoptionController extends Controller
         //todo: validate whether user can delete adoption
         // There has no rules for Adoption removal from database, only final status as Canceled, Reproved, Adopted or Suspended.
 
-        $adoption = $this->adoptionRepository->find((int) $request->uriParams('id'));
+        $adoptionWithRelationship = $this->adoptionRepository->findWithRelationship((int) $request->uriParams('id'));
 
-        if (!$adoption instanceof Adoption) {
+        $pet = $adoptionWithRelationship->pet();
+
+        if (!$adoptionWithRelationship instanceof Adoption) {
             return $this->notFoundJsonResponse('Adoption not found.');
         }
-
-        $this->adoptionRepository->remove($adoption);
-
-        //todo: update pet status after adoption deleted
-
-        $pet = $this->petRepository->find($adoption->petId());
 
         if (!$pet instanceof Pet) {
             return $this->notFoundJsonResponse('Pet not found.');
         }
 
+        $this->beginTransaction();
+
+        if (!$this->adoptionRepository->remove($adoptionWithRelationship)) {
+            $this->rollback();
+            return $this->errorJsonResponse('Error on removing adoption.');
+        }
+
         $pet->available();
 
         if (!$this->petRepository->save($pet)) {
+            $this->rollback();
             return $this->errorJsonResponse('Error on update pet status.');
         }
 
-        return new JsonResponse($adoption, 200);
+        $this->commit();
+
+        return new JsonResponse($adoptionWithRelationship->adoption(), 200);
     }
 }

@@ -55,9 +55,30 @@ class UserWithRelationship extends User
     /**
      * 
      */
+    public function userWithoutRelationship(): User
+    {
+        return new User(
+            id: $this->id,
+            name: $this->name,
+            email: $this->email,
+            emailVerified: $this->emailVerified,
+            password: $this->password,
+            picture: $this->picture,
+            city: $this->city,
+            state: $this->state,
+            about: $this->about,
+            role: $this->role,
+            created_at: $this->createdAt(),
+            updated_at: $this->updatedAt()
+        );
+    }
+
+    /**
+     * 
+     */
     public function jsonSerialize(): mixed
     {
-        return array(
+        $userArray = array(
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
@@ -70,9 +91,17 @@ class UserWithRelationship extends User
             'about' => $this->about,
             'role' => $this->role->value,
             'created_at' => $this->createdAt(),
-            'updated_at' => $this->updatedAt(),
-            'adoptions' => $this->adoptions,
-            'pets' => $this->pets
+            'updated_at' => $this->updatedAt()
         );
+
+        if (!empty($this->adoptions)) {
+            $userArray['adoptions'] = $this->adoptions;
+        }
+
+        if (!empty($this->pets)) {
+            $userArray['pets'] = $this->pets;
+        }
+
+        return $userArray;
     }
 }

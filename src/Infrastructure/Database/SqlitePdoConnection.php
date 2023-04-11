@@ -16,6 +16,6 @@ class SqlitePdoConnection extends PdoConnection
     {
         $dsn = 'sqlite:' . DATABASE_PATH . env('DB_PATH', 'database.sqlite');
 
-        $this->connection = new PDO($dsn);
+        self::$connection = new PDO($dsn);
     }
 }

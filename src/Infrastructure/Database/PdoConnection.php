@@ -6,19 +6,42 @@ namespace Jayrods\ScubaPHP\Infrastructure\Database;
 
 use PDO;
 
+/**
+ * Provides a Singleton PDO conenction.
+ */
 abstract class PdoConnection
 {
     /**
      * 
      */
-    protected PDO $connection;
+    protected static PDO $connection;
 
     /**
      * 
      */
     public function __construct()
     {
-        $this->connect();
+        if (!isset(self::$connection)) {
+            $this->connect();
+            $this->setAttributes();
+        }
+    }
+
+    /**
+     * 
+     */
+    private function setAttributes(): void
+    {
+        $errMode = match (ENVIRONMENT) {
+            'production' => PDO::ERRMODE_SILENT,
+            'development' => PDO::ERRMODE_EXCEPTION,
+            'test' => PDO::ERRMODE_WARNING
+        };
+
+        self::$connection->setAttribute(
+            PDO::ATTR_ERRMODE,
+            $errMode
+        );
     }
 
     /**
@@ -31,6 +54,6 @@ abstract class PdoConnection
      */
     public function getConnection(): PDO
     {
-        return $this->connection;
+        return self::$connection;
     }
 }
