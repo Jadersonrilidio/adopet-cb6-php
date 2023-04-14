@@ -6,9 +6,7 @@ declare(strict_types=1);
  * Routes map, with keys containing the routes and values containing the parameters controller, method and middlewares to execute.
  */
 return array(
-
     // Web Auth Routes
-
     'GET|/register' => [Jayrods\ScubaPHP\Controller\Auth\RegisterController::class, 'index', ['guest']],
     'POST|/register' => [Jayrods\ScubaPHP\Controller\Auth\RegisterController::class, 'register', ['guest']],
     'GET|/login' => [Jayrods\ScubaPHP\Controller\Auth\LoginController::class, 'index', ['guest']],
@@ -21,16 +19,11 @@ return array(
     'POST|/change-password' => [Jayrods\ScubaPHP\Controller\Auth\ChangePasswordController::class, 'alterPassword', ['guest']],
     'GET|/verify-email' => [Jayrods\ScubaPHP\Controller\Auth\EmailVerificationController::class, 'verifyEmail', ['guest']],
 
-
     // Web Routes
-
     'GET|/' => [Jayrods\ScubaPHP\Controller\HomeController::class, 'index', ['auth']],
 
-
     // Web Fallback Route
-
     'fallback' => [Jayrods\ScubaPHP\Controller\NotFoundController::class, 'index'],
-
 
     // API Routes
 
@@ -64,8 +57,6 @@ return array(
     'PATCH|/api/adoptions/{id}' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'update'],
     'DELETE|/api/adoptions/{id}' => [Jayrods\ScubaPHP\Controller\API\AdoptionController::class, 'remove'],
 
-
     // API Fallback Route
-
-    // 'api-fallback' => [Jayrods\ScubaPHP\Controller\ApiNotFoundController::class, 'notFound'],
+    'api-fallback' => [Jayrods\ScubaPHP\Controller\API\ApiNotFoundController::class, 'notFound'],
 );

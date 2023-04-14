@@ -9,7 +9,7 @@ trait JsonCache
     /**
      * 
      */
-    public static function getJsonCache(string $file): ?array
+    public function getJsonCache(string $file): ?array
     {
         if (!$jsonCache = file_get_contents(CACHE_DIR . $file . '.json')) {
             return null;
@@ -25,7 +25,7 @@ trait JsonCache
     /**
      * 
      */
-    public static function storeJsonCache(mixed $content, string $file): int|false
+    public function storeJsonCache(mixed $content, string $file): int|false
     {
         $cache = array(
             'timestamp' => time(),

@@ -53,6 +53,35 @@ class PetController extends Controller
         return new JsonResponse($pets, 200);
     }
 
+    // /**
+    //  * //test
+    //  */
+    // public function search(Request $request): JsonResponse
+    // {
+    //     // http://localhost:8001/api/pets?with=user&by=size:mini,small,medium;species:dog,cat;
+    //     //fix: A Better alternative would be: http://localhost:8001/api/pets?size=mini,small,medium&species=dog,cat;
+
+    //     $with = $request->queryParams('with');
+    //     $by = $request->queryParams('by');
+
+    //     $by = explode(';', $by);
+
+    //     $searchParams = [];
+
+    //     foreach ($by as $attribute) {
+    //         $tempArray = explode(':', $attribute);
+
+    //         $attribute = $tempArray[0];
+    //         $valuesArray = explode(',', $tempArray[1]);
+
+    //         $searchParams[$attribute] = $valuesArray;
+    //     }
+
+    //     $content = $this->petRepository->search($searchParams, $with);
+
+    //     return new JsonResponse($content, 200);
+    // }
+
     /**
      * 
      */
